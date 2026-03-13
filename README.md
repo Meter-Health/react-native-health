@@ -8,6 +8,22 @@ This package allows access to health & fitness data exposed by Apple Healthkit. 
 
 If you are looking for a more robust solution providing normalized data, insights and recommendations based on user's biometric data, data from multiple sources (Fitbit, Oura), or a hosted solution, please check out the [Point SDK](https://www.areyouonpoint.co/) developed by our frens.
 
+---
+## METER HEALTH
+### Fork changelog:
+
+- Added save functions for:
+  - Heartrate variabliliy
+  - Resting heartrate
+  - Active Energy
+  - Basal Energy
+  - Vo2Max
+  - OxygenSaturation
+  - Respiratory rate
+  - SleepAnalysis
+
+---
+
 # New Version
 
 (August 2023)

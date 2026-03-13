@@ -363,16 +363,16 @@ RCT_EXPORT_METHOD(getWater:(NSDictionary *)input callback:(RCTResponseSenderBloc
     [self getWater:input callback:callback];
 }
 
-RCT_EXPORT_METHOD(saveHeartRateSample:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
-{
-    [self _initializeHealthStore];
-    [self vitals_saveHeartRateSample:input callback:callback];
-}
-
 RCT_EXPORT_METHOD(getWaterSamples:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
 {
     [self _initializeHealthStore];
     [self getWaterSamples:input callback:callback];
+}
+
+RCT_EXPORT_METHOD(saveHeartRateSample:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self _initializeHealthStore];
+    [self vitals_saveHeartRateSample:input callback:callback];
 }
 
 RCT_EXPORT_METHOD(getHeartRateSamples:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
@@ -393,10 +393,20 @@ RCT_EXPORT_METHOD(getWalkingHeartRateAverage:(NSDictionary *)input callback:(RCT
     [self vitals_getWalkingHeartRateAverage:input callback:callback];
 }
 
+RCT_EXPORT_METHOD(saveActiveEnergyBurned:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self vitals_saveActiveEnergyBurned:input callback:callback];
+}
+
 RCT_EXPORT_METHOD(getActiveEnergyBurned:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
 {
    [self _initializeHealthStore];
    [self activity_getActiveEnergyBurned:input callback:callback];
+}
+
+RCT_EXPORT_METHOD(saveBasalEnergyBurned:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self vitals_saveBasalEnergyBurned:input callback:callback];
 }
 
 RCT_EXPORT_METHOD(getBasalEnergyBurned:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
@@ -417,6 +427,11 @@ RCT_EXPORT_METHOD(getAppleStandTime:(NSDictionary *)input callback:(RCTResponseS
     [self activity_getAppleStandTime:input callback:callback];
 }
 
+RCT_EXPORT_METHOD(saveVo2MaxSample:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self vitals_saveVo2MaxSample:input callback:callback];
+}
+
 RCT_EXPORT_METHOD(getVo2MaxSamples:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
 {
     [self _initializeHealthStore];
@@ -435,10 +450,20 @@ RCT_EXPORT_METHOD(getBloodPressureSamples:(NSDictionary *)input callback:(RCTRes
     [self vitals_getBloodPressureSamples:input callback:callback];
 }
 
+RCT_EXPORT_METHOD(saveRespiratoryRateSample:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self vitals_saveRespiratoryRateSample:input callback:callback];
+}
+
 RCT_EXPORT_METHOD(getRespiratoryRateSamples:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
 {
     [self _initializeHealthStore];
     [self vitals_getRespiratoryRateSamples:input callback:callback];
+}
+
+RCT_EXPORT_METHOD(saveHeartRateVariabilitySample:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self vitals_saveHeartRateVariabilitySample:input callback:callback];
 }
 
 RCT_EXPORT_METHOD(getHeartRateVariabilitySamples:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
@@ -453,10 +478,20 @@ RCT_EXPORT_METHOD(getHeartbeatSeriesSamples:(NSDictionary *)input callback:(RCTR
     [self vitals_getHeartbeatSeriesSamples:input callback:callback];
 }
 
+RCT_EXPORT_METHOD(saveRestingHeartRateSample:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self vitals_saveRestingHeartRateSample:input callback:callback];
+}
+
 RCT_EXPORT_METHOD(getRestingHeartRateSamples:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
 {
     [self _initializeHealthStore];
     [self vitals_getRestingHeartRateSamples:input callback:callback];
+}
+
+RCT_EXPORT_METHOD(saveOxygenSaturationSample:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self vitals_saveOxygenSaturationSample:input callback:callback];
 }
 
 RCT_EXPORT_METHOD(getOxygenSaturationSamples:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
@@ -531,6 +566,11 @@ RCT_EXPORT_METHOD(getSleepSamples:(NSDictionary *)input callback:(RCTResponseSen
     [self sleep_getSleepSamples:input callback:callback];
 }
 
+RCT_EXPORT_METHOD(saveSleepSample:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self saveSleepSample:input callback:callback];
+}
+
 RCT_EXPORT_METHOD(getInfo:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
 {
     [self _initializeHealthStore];
@@ -601,6 +641,11 @@ RCT_EXPORT_METHOD(getClinicalRecords:(NSDictionary *)input callback:(RCTResponse
 {
     [self _initializeHealthStore];
     [self clinicalRecords_getClinicalRecords:input callback:callback];
+}
+
+RCT_EXPORT_METHOD(deleteSamplesByType:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self deleteSamplesByType:input callback:callback];
 }
 
 - (HKHealthStore *)_initializeHealthStore {

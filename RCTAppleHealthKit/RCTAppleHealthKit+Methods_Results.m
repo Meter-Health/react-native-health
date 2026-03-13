@@ -249,4 +249,105 @@
     }
 }
 
+- (void)deleteSamplesByType:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback {
+    NSString *type = [RCTAppleHealthKit stringFromOptions:input key:@"type" withDefault:nil];
+    NSDate *startDate = [RCTAppleHealthKit startDateFromOptions:input];
+    NSDate *endDate = [RCTAppleHealthKit endDateFromOptionsDefaultNow:input];
+
+    if (!type || !startDate) {
+        callback(@[@"type and startDate are required", [NSNull null]]);
+        return;
+    }
+
+    HKSampleType *sampleType = nil;
+
+    if ([type isEqualToString:@"MindfulSession"]) {
+        sampleType = [HKObjectType categoryTypeForIdentifier:HKCategoryTypeIdentifierMindfulSession];
+    } else if ([type isEqualToString:@"SleepAnalysis"]) {
+        sampleType = [HKObjectType categoryTypeForIdentifier:HKCategoryTypeIdentifierSleepAnalysis];
+    } else if ([type isEqualToString:@"Workout"]) {
+        sampleType = [HKObjectType workoutType];
+    } else {
+        NSDictionary *typeMap = @{
+            @"HeartRate":              HKQuantityTypeIdentifierHeartRate,
+            @"HeartRateVariability":   HKQuantityTypeIdentifierHeartRateVariabilitySDNN,
+            @"RestingHeartRate":       HKQuantityTypeIdentifierRestingHeartRate,
+            @"ActiveEnergyBurned":     HKQuantityTypeIdentifierActiveEnergyBurned,
+            @"BasalEnergyBurned":      HKQuantityTypeIdentifierBasalEnergyBurned,
+            @"StepCount":              HKQuantityTypeIdentifierStepCount,
+            @"Weight":                 HKQuantityTypeIdentifierBodyMass,
+            @"Height":                 HKQuantityTypeIdentifierHeight,
+            @"Vo2Max":                 HKQuantityTypeIdentifierVO2Max,
+            @"OxygenSaturation":       HKQuantityTypeIdentifierOxygenSaturation,
+            @"RespiratoryRate":        HKQuantityTypeIdentifierRespiratoryRate,
+            @"BodyTemperature":        HKQuantityTypeIdentifierBodyTemperature,
+            @"BodyFatPercentage":      HKQuantityTypeIdentifierBodyFatPercentage,
+            @"DistanceWalkingRunning": HKQuantityTypeIdentifierDistanceWalkingRunning,
+        };
+        NSString *identifier = typeMap[type];
+        if (!identifier) {
+            callback(@[[NSString stringWithFormat:@"Unknown type: %@", type], [NSNull null]]);
+            return;
+        }
+        sampleType = [HKObjectType quantityTypeForIdentifier:identifier];
+    }
+
+    if (!sampleType) {
+        callback(@[[NSString stringWithFormat:@"Could not resolve HKSampleType for: %@", type], [NSNull null]]);
+        return;
+    }
+
+    NSPredicate *predicate = [HKQuery predicateForSamplesWithStartDate:startDate endDate:endDate options:HKQueryOptionNone];
+
+    HKSampleQuery *query = [[HKSampleQuery alloc]
+        initWithSampleType:sampleType
+        predicate:predicate
+        limit:HKObjectQueryNoLimit
+        sortDescriptors:nil
+        resultsHandler:^(HKSampleQuery *q, NSArray *samples, NSError *error) {
+            if (error) {
+                callback(@[error.localizedDescription, [NSNull null]]);
+                return;
+            }
+            if (!samples || samples.count == 0) {
+                callback(@[[NSNull null], @0]);
+                return;
+            }
+            [self.healthStore deleteObjects:samples withCompletion:^(BOOL success, NSError *deleteError) {
+                if (!success) {
+                    callback(@[deleteError.localizedDescription ?: @"Delete failed", [NSNull null]]);
+                    return;
+                }
+                callback(@[[NSNull null], @(samples.count)]);
+            }];
+        }];
+
+    [self.healthStore executeQuery:query];
+}
+
+- (void)saveSleepSample:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback {
+    NSDate *startDate = [RCTAppleHealthKit dateFromOptions:input key:@"startDate" withDefault:nil];
+    NSDate *endDate   = [RCTAppleHealthKit dateFromOptions:input key:@"endDate"   withDefault:nil];
+    NSInteger value   = (NSInteger)[RCTAppleHealthKit doubleFromOptions:input key:@"value" withDefault:0];
+
+    if (!startDate || !endDate) {
+        callback(@[@"startDate and endDate are required", [NSNull null]]);
+        return;
+    }
+
+    HKCategoryType *sleepType = [HKObjectType categoryTypeForIdentifier:HKCategoryTypeIdentifierSleepAnalysis];
+
+    HKCategorySample *sample = [HKCategorySample categorySampleWithType:sleepType
+                                                                  value:(HKCategoryValue)value
+                                                              startDate:startDate
+                                                                endDate:endDate];
+
+    [self.healthStore saveObject:sample withCompletion:^(BOOL success, NSError *error) {
+        if (!success) {
+            callback(@[error.localizedDescription ?: @"Failed to save sleep sample", [NSNull null]]);
+            return;
+        }
+        callback(@[[NSNull null], sample.UUID.UUIDString]);
+    }];
+}
 @end

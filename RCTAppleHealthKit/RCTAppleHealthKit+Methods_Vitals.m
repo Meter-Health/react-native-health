@@ -40,6 +40,233 @@
     }];
 }
 
+- (void)vitals_saveHeartRateVariabilitySample:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
+{
+    NSDate *date = [RCTAppleHealthKit dateFromOptions:input key:@"date" withDefault:[NSDate date]];
+    double value = [RCTAppleHealthKit doubleFromOptions:input key:@"value" withDefault:-99];
+    if (value == -99) {
+        callback(@[RCTMakeError(@"value is required in options", nil, nil)]);
+        return;
+    }
+
+    // HealthKit HRV SDNN is a time quantity. Your current reader uses secondUnit.
+    // If you want ms by default instead, switch to:
+    // HKUnit *unit = [HKUnit secondUnitWithMetricPrefix:HKMetricPrefixMilli];
+    HKUnit *unit = [RCTAppleHealthKit hkUnitFromOptions:input
+                                                    key:@"unit"
+                                            withDefault:[HKUnit secondUnit]];
+
+    HKQuantitySample *sample =
+    [HKQuantitySample quantitySampleWithType:[HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeartRateVariabilitySDNN]
+                                    quantity:[HKQuantity quantityWithUnit:unit doubleValue:value]
+                                   startDate:date
+                                     endDate:date];
+
+    [self.healthStore saveObject:sample withCompletion:^(BOOL success, NSError *error) {
+        if (!success) {
+            NSLog(@"An error occured saving the heart rate variability sample: %@", error);
+            callback(@[RCTMakeError(@"An error occured saving the heart rate variability sample", error, nil)]);
+            return;
+        }
+        callback(@[[NSNull null], @true]);
+    }];
+}
+
+- (void)vitals_saveRestingHeartRateSample:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
+{
+    NSDate *date = [RCTAppleHealthKit dateFromOptions:input key:@"date" withDefault:[NSDate date]];
+    double value = [RCTAppleHealthKit doubleFromOptions:input key:@"value" withDefault:-99];
+    if (value == -99) {
+        callback(@[RCTMakeError(@"value is required in options", nil, nil)]);
+        return;
+    }
+
+    HKUnit *count = [HKUnit countUnit];
+    HKUnit *minute = [HKUnit minuteUnit];
+    HKUnit *unit = [RCTAppleHealthKit hkUnitFromOptions:input
+                                                    key:@"unit"
+                                            withDefault:[count unitDividedByUnit:minute]];
+
+    HKQuantitySample *sample =
+    [HKQuantitySample quantitySampleWithType:[HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierRestingHeartRate]
+                                    quantity:[HKQuantity quantityWithUnit:unit doubleValue:value]
+                                   startDate:date
+                                     endDate:date];
+
+    [self.healthStore saveObject:sample withCompletion:^(BOOL success, NSError *error) {
+        if (!success) {
+            NSLog(@"An error occured saving the resting heart rate sample: %@", error);
+            callback(@[RCTMakeError(@"An error occured saving the resting heart rate sample", error, nil)]);
+            return;
+        }
+        callback(@[[NSNull null], @true]);
+    }];
+}
+
+- (void)vitals_saveActiveEnergyBurned:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
+{
+    NSDate *startDate = [RCTAppleHealthKit dateFromOptions:input key:@"startDate" withDefault:nil];
+    NSDate *endDate = [RCTAppleHealthKit dateFromOptions:input key:@"endDate" withDefault:startDate ?: [NSDate date]];
+    double value = [RCTAppleHealthKit doubleFromOptions:input key:@"value" withDefault:-99];
+
+    if (startDate == nil) {
+        callback(@[RCTMakeError(@"startDate is required in options", nil, nil)]);
+        return;
+    }
+    if (value == -99) {
+        callback(@[RCTMakeError(@"value is required in options", nil, nil)]);
+        return;
+    }
+
+    HKUnit *unit = [RCTAppleHealthKit hkUnitFromOptions:input
+                                                    key:@"unit"
+                                            withDefault:[HKUnit kilocalorieUnit]];
+
+    HKQuantitySample *sample =
+    [HKQuantitySample quantitySampleWithType:[HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierActiveEnergyBurned]
+                                    quantity:[HKQuantity quantityWithUnit:unit doubleValue:value]
+                                   startDate:startDate
+                                     endDate:endDate];
+
+    [self.healthStore saveObject:sample withCompletion:^(BOOL success, NSError *error) {
+        if (!success) {
+            NSLog(@"An error occured saving the active energy burned sample: %@", error);
+            callback(@[RCTMakeError(@"An error occured saving the active energy burned sample", error, nil)]);
+            return;
+        }
+        callback(@[[NSNull null], @true]);
+    }];
+}
+
+- (void)vitals_saveBasalEnergyBurned:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
+{
+    NSDate *startDate = [RCTAppleHealthKit dateFromOptions:input key:@"startDate" withDefault:nil];
+    NSDate *endDate = [RCTAppleHealthKit dateFromOptions:input key:@"endDate" withDefault:startDate ?: [NSDate date]];
+    double value = [RCTAppleHealthKit doubleFromOptions:input key:@"value" withDefault:-99];
+
+    if (startDate == nil) {
+        callback(@[RCTMakeError(@"startDate is required in options", nil, nil)]);
+        return;
+    }
+    if (value == -99) {
+        callback(@[RCTMakeError(@"value is required in options", nil, nil)]);
+        return;
+    }
+
+    HKUnit *unit = [RCTAppleHealthKit hkUnitFromOptions:input
+                                                    key:@"unit"
+                                            withDefault:[HKUnit kilocalorieUnit]];
+
+    HKQuantitySample *sample =
+    [HKQuantitySample quantitySampleWithType:[HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierBasalEnergyBurned]
+                                    quantity:[HKQuantity quantityWithUnit:unit doubleValue:value]
+                                   startDate:startDate
+                                     endDate:endDate];
+
+    [self.healthStore saveObject:sample withCompletion:^(BOOL success, NSError *error) {
+        if (!success) {
+            NSLog(@"An error occured saving the basal energy burned sample: %@", error);
+            callback(@[RCTMakeError(@"An error occured saving the basal energy burned sample", error, nil)]);
+            return;
+        }
+        callback(@[[NSNull null], @true]);
+    }];
+}
+
+- (void)vitals_saveVo2MaxSample:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
+{
+    NSDate *date = [RCTAppleHealthKit dateFromOptions:input key:@"date" withDefault:[NSDate date]];
+    double value = [RCTAppleHealthKit doubleFromOptions:input key:@"value" withDefault:-99];
+    if (value == -99) {
+        callback(@[RCTMakeError(@"value is required in options", nil, nil)]);
+        return;
+    }
+
+    HKUnit *ml = [HKUnit literUnitWithMetricPrefix:HKMetricPrefixMilli];
+    HKUnit *kg = [HKUnit gramUnitWithMetricPrefix:HKMetricPrefixKilo];
+    HKUnit *min = [HKUnit minuteUnit];
+    HKUnit *defaultUnit = [ml unitDividedByUnit:[kg unitMultipliedByUnit:min]]; // mL/(kg*min)
+
+    HKUnit *unit = [RCTAppleHealthKit hkUnitFromOptions:input
+                                                    key:@"unit"
+                                            withDefault:defaultUnit];
+
+    HKQuantitySample *sample =
+    [HKQuantitySample quantitySampleWithType:[HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierVO2Max]
+                                    quantity:[HKQuantity quantityWithUnit:unit doubleValue:value]
+                                   startDate:date
+                                     endDate:date];
+
+    [self.healthStore saveObject:sample withCompletion:^(BOOL success, NSError *error) {
+        if (!success) {
+            NSLog(@"An error occured saving the VO2 max sample: %@", error);
+            callback(@[RCTMakeError(@"An error occured saving the VO2 max sample", error, nil)]);
+            return;
+        }
+        callback(@[[NSNull null], @true]);
+    }];
+}
+
+- (void)vitals_saveOxygenSaturationSample:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
+{
+    NSDate *date = [RCTAppleHealthKit dateFromOptions:input key:@"date" withDefault:[NSDate date]];
+    double value = [RCTAppleHealthKit doubleFromOptions:input key:@"value" withDefault:-99];
+    if (value == -99) {
+        callback(@[RCTMakeError(@"value is required in options", nil, nil)]);
+        return;
+    }
+
+    HKUnit *unit = [RCTAppleHealthKit hkUnitFromOptions:input
+                                                    key:@"unit"
+                                            withDefault:[HKUnit percentUnit]];
+
+    HKQuantitySample *sample =
+    [HKQuantitySample quantitySampleWithType:[HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierOxygenSaturation]
+                                    quantity:[HKQuantity quantityWithUnit:unit doubleValue:value]
+                                   startDate:date
+                                     endDate:date];
+
+    [self.healthStore saveObject:sample withCompletion:^(BOOL success, NSError *error) {
+        if (!success) {
+            NSLog(@"An error occured saving the oxygen saturation sample: %@", error);
+            callback(@[RCTMakeError(@"An error occured saving the oxygen saturation sample", error, nil)]);
+            return;
+        }
+        callback(@[[NSNull null], @true]);
+    }];
+}
+
+- (void)vitals_saveRespiratoryRateSample:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
+{
+    NSDate *date = [RCTAppleHealthKit dateFromOptions:input key:@"date" withDefault:[NSDate date]];
+    double value = [RCTAppleHealthKit doubleFromOptions:input key:@"value" withDefault:-99];
+    if (value == -99) {
+        callback(@[RCTMakeError(@"value is required in options", nil, nil)]);
+        return;
+    }
+
+    HKUnit *count = [HKUnit countUnit];
+    HKUnit *minute = [HKUnit minuteUnit];
+    HKUnit *unit = [RCTAppleHealthKit hkUnitFromOptions:input
+                                                    key:@"unit"
+                                            withDefault:[count unitDividedByUnit:minute]];
+
+    HKQuantitySample *sample =
+    [HKQuantitySample quantitySampleWithType:[HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierRespiratoryRate]
+                                    quantity:[HKQuantity quantityWithUnit:unit doubleValue:value]
+                                   startDate:date
+                                     endDate:date];
+
+    [self.healthStore saveObject:sample withCompletion:^(BOOL success, NSError *error) {
+        if (!success) {
+            NSLog(@"An error occured saving the respiratory rate sample: %@", error);
+            callback(@[RCTMakeError(@"An error occured saving the respiratory rate sample", error, nil)]);
+            return;
+        }
+        callback(@[[NSNull null], @true]);
+    }];
+}
+
 - (void)vitals_getHeartRateSamples:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
 {
     HKQuantityType *heartRateType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeartRate];

@@ -10,6 +10,13 @@
 @interface RCTAppleHealthKit (Methods_Vitals)
 
 - (void)vitals_saveHeartRateSample:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
+- (void)vitals_saveHeartRateVariabilitySample:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
+- (void)vitals_saveRestingHeartRateSample:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
+- (void)vitals_saveActiveEnergyBurned:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
+- (void)vitals_saveBasalEnergyBurned:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
+- (void)vitals_saveVo2MaxSample:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
+- (void)vitals_saveOxygenSaturationSample:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
+- (void)vitals_saveRespiratoryRateSample:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
 - (void)vitals_getHeartRateSamples:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
 - (void)vitals_getRestingHeartRate:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
 - (void)vitals_getWalkingHeartRateAverage:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;

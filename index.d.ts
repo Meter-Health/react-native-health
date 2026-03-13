@@ -260,9 +260,19 @@ declare module 'react-native-health' {
       callback: (err: string, results: HealthValue[]) => void,
     ): void
 
+    saveActiveEnergyBurned(
+      options: HealthValueOptions,
+      callback: (error: string, result: HealthValue) => void,
+    ): void
+
     getActiveEnergyBurned(
       options: HealthInputOptions,
       callback: (err: string, results: Array<HealthValue>) => void,
+    ): void
+
+    saveBasalEnergyBurned(
+      options: HealthValueOptions,
+      callback: (error: string, result: HealthValue) => void,
     ): void
 
     getBasalEnergyBurned(
@@ -280,6 +290,11 @@ declare module 'react-native-health' {
       callback: (err: string, results: Array<HealthValue>) => void,
     ): void
 
+    saveVo2MaxSample(
+      options: HealthValueOptions,
+      callback: (error: string, result: HealthValue) => void,
+    ): void
+
     getVo2MaxSamples(
       options: HealthInputOptions,
       callback: (err: string, results: Array<HealthValue>) => void,
@@ -295,9 +310,19 @@ declare module 'react-native-health' {
       callback: (err: string, results: Array<BloodPressureSampleValue>) => void,
     ): void
 
+    saveRespiratoryRateSample(
+      options: HealthValueOptions,
+      callback: (error: string, result: HealthValue) => void,
+    ): void
+
     getRespiratoryRateSamples(
       options: HealthInputOptions,
       callback: (err: string, results: Array<HealthValue>) => void,
+    ): void
+
+    saveHeartRateVariabilitySample(
+      options: HealthValueOptions,
+      callback: (error: string, result: HealthValue) => void,
     ): void
 
     getHeartRateVariabilitySamples(
@@ -308,6 +333,11 @@ declare module 'react-native-health' {
     getHeartbeatSeriesSamples(
       options: HealthInputOptions,
       callback: (err: string, results: HeartbeatSeriesSampleValue[]) => void,
+    ): void
+
+    saveRestingHeartRateSample(
+      options: HealthValueOptions,
+      callback: (error: string, result: HealthValue) => void,
     ): void
 
     getRestingHeartRateSamples(
@@ -403,6 +433,11 @@ declare module 'react-native-health' {
     getDailyDistanceSwimmingSamples(
       options: HealthInputOptions,
       callback: (err: string, results: Array<HealthValue>) => void,
+    ): void
+
+    saveOxygenSaturationSample(
+      options: HealthValueOptions,
+      callback: (error: string, result: HealthValue) => void,
     ): void
 
     getOxygenSaturationSamples(
@@ -584,6 +619,7 @@ declare module 'react-native-health' {
 
   export interface HealthValueOptions extends HealthUnitOptions {
     value: number
+    date?: string;
     startDate?: string
     endDate?: string
     metadata?: RecordMetadata
