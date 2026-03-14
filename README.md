@@ -13,7 +13,7 @@ If you are looking for a more robust solution providing normalized data, insight
 ### Fork changelog:
 
 - Added save functions for:
-  - Heartrate variabliliy
+  - Heartrate variability
   - Resting heartrate
   - Active Energy
   - Basal Energy
