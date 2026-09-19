@@ -1,5 +1,9 @@
 # Table of contents
 
+## Guides
+
+* [Migrating from 1.x to 2.0](/docs/Migration-2.0.md)
+
 ## Constants
 
 * [Activities](/docs/activities.md)

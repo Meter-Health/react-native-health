@@ -12,6 +12,8 @@ If you are looking for a more robust solution providing normalized data, insight
 ## METER HEALTH
 ### Fork changelog:
 
+Upgrading from 1.x? See the [migration guide](/docs/Migration-2.0.md) for what changes from the app's perspective.
+
 #### 2.0.0
 
 - **New Architecture / TurboModule support.** The module ships a codegen spec
