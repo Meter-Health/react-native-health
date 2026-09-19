@@ -398,7 +398,7 @@ NSString * const kMetadataKey = @"metadata";
          theUnit = [HKUnit decibelAWeightedSoundPressureLevelUnit];
     }
     if ([unitString isEqualToString:@"microsiemens"]) {
-         theUnit = [HKUnit siemensUnitWithMetricPrefix:HKMetricPrefixMicro];
+         theUnit = [HKUnit siemenUnitWithMetricPrefix:HKMetricPrefixMicro];
     }
     if ([unitString isEqualToString:@"appleEffortScore"]) {
          if (@available(iOS 18.0, *)) {
@@ -442,7 +442,7 @@ NSString * const kMetadataKey = @"metadata";
         [HKUnit gramUnit],
         [HKUnit millimeterOfMercuryUnit],
         [HKUnit decibelAWeightedSoundPressureLevelUnit],
-        [HKUnit siemensUnitWithMetricPrefix:HKMetricPrefixMicro],
+        [HKUnit siemenUnitWithMetricPrefix:HKMetricPrefixMicro],
         [[HKUnit kilocalorieUnit] unitDividedByUnit:[[HKUnit gramUnitWithMetricPrefix:HKMetricPrefixKilo] unitMultipliedByUnit:[HKUnit hourUnit]]],
         [HKUnit internationalUnit],
         [[HKUnit literUnitWithMetricPrefix:HKMetricPrefixMilli] unitDividedByUnit:[[HKUnit gramUnitWithMetricPrefix:HKMetricPrefixKilo] unitMultipliedByUnit:[HKUnit minuteUnit]]],

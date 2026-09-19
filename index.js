@@ -6,12 +6,23 @@ import NativeAppleHealthKit from './src/NativeAppleHealthKit'
 const AppleHealthKit =
   NativeAppleHealthKit ?? require('react-native').NativeModules.AppleHealthKit
 
-export const HealthKit = Object.assign({}, AppleHealthKit, {
-  Constants: {
-    Activities,
-    Observers,
-    Permissions,
-    Units,
+const Constants = {
+  Activities,
+  Observers,
+  Permissions,
+  Units,
+}
+
+// TurboModule methods are resolved lazily on first access, so they are not
+// enumerable own properties yet when this module is evaluated. Copying with
+// Object.assign / spread would therefore drop every method under the New
+// Architecture; forward property access to the native module instead.
+export const HealthKit = new Proxy(AppleHealthKit ?? {}, {
+  get(target, prop) {
+    return prop === 'Constants' ? Constants : Reflect.get(target, prop)
+  },
+  has(target, prop) {
+    return prop === 'Constants' || Reflect.has(target, prop)
   },
 })
 
