@@ -101,18 +101,11 @@
                                    ascending:(BOOL)asc
                                    completion:(void (^)(NSArray *, NSError *))completion;
 
-- (void)fetchWorkoutForPredicate:(NSPredicate *)predicate
-                       ascending:(BOOL)ascending
-                           limit:(NSUInteger)limit
-                      completion:(void (^)(NSArray *, NSError *))completion;
-
 - (void)setObserverForType:(HKSampleType *)quantityType
                       type:(NSString *)type __deprecated;
 
-- (void)setObserverForType:(HKSampleType *)quantityType
-                      type:(NSString *)type
-                    bridge:(RCTBridge *)bridge
-                    hasListeners:(bool)hasListeners;
+- (void)registerBackgroundObserverForType:(HKSampleType *)quantityType
+                                     type:(NSString *)type;
 
 - (void)fetchActivitySummary:(NSDate *)startDate
                      endDate:(NSDate *)endDate

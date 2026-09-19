@@ -71,6 +71,10 @@
         return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierDistanceCycling];
     } else if ([@"DistanceSwimming" isEqualToString: key]) {
         return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierDistanceSwimming];
+    } else if ([@"DistanceWheelchair" isEqualToString:key]) {
+        return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierDistanceWheelchair];
+    } else if ([@"DistanceDownhillSnowSports" isEqualToString:key]) {
+        return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierDistanceDownhillSnowSports];
     } else if ([@"BasalEnergyBurned" isEqualToString: key]) {
         return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierBasalEnergyBurned];
     } else if ([@"ActiveEnergyBurned" isEqualToString: key]) {
@@ -264,7 +268,11 @@
         return [RCTAppleHealthKit clinicalTypeFromName:@"VitalSignRecord"];
     }
 
-    return nil;
+    HKObjectType *wellbeingOrMedication = [RCTAppleHealthKit wellbeingOrMedicationTypeFromName:key];
+    if (wellbeingOrMedication != nil) {
+        return wellbeingOrMedication;
+    }
+    return [RCTAppleHealthKit extendedSampleTypeFromName:key];
 }
 
 - (nullable HKObjectType *)getWritePermFromText:(nonnull NSString*) key {
@@ -306,6 +314,10 @@
         return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierDistanceCycling];
     } else if ([@"DistanceSwimming" isEqualToString:key]) {
         return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierDistanceSwimming];
+    } else if ([@"DistanceWheelchair" isEqualToString:key]) {
+        return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierDistanceWheelchair];
+    } else if ([@"DistanceDownhillSnowSports" isEqualToString:key]) {
+        return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierDistanceDownhillSnowSports];
     } else if ([@"BasalEnergyBurned" isEqualToString:key]) {
         return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierBasalEnergyBurned];
     } else if ([@"ActiveEnergyBurned" isEqualToString:key]) {
@@ -467,7 +479,15 @@
         return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierRespiratoryRate];
     }
 
-    return nil;
+    if ([RCTAppleHealthKit isReadOnlyTypeName:key]) {
+        RCTLogWarn(@"[HealthKit] %@ is read-only in HealthKit; ignoring it in the write permissions", key);
+        return nil;
+    }
+    HKObjectType *wellbeingOrMedication = [RCTAppleHealthKit wellbeingOrMedicationTypeFromName:key];
+    if (wellbeingOrMedication != nil) {
+        return wellbeingOrMedication;
+    }
+    return [RCTAppleHealthKit extendedSampleTypeFromName:key];
 }
 
 // Returns HealthKit read permissions from options array
@@ -518,6 +538,259 @@
     }
 }
 
+
+#pragma mark - Extended identifiers
+
+/*!
+    Quantity identifiers that are not covered by the hand-written maps above. Names are the
+    HKQuantityTypeIdentifier suffix. Entries that need a newer iOS are only added when running on it.
+ */
++ (NSDictionary<NSString *, HKQuantityTypeIdentifier> *)extendedQuantityIdentifiers
+{
+    static NSDictionary *map = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSMutableDictionary *m = [NSMutableDictionary dictionary];
+        [m addEntriesFromDictionary:@{
+            @"AppleMoveTime": HKQuantityTypeIdentifierAppleMoveTime,
+            @"AppleWalkingSteadiness": HKQuantityTypeIdentifierAppleWalkingSteadiness,
+            @"BasalBodyTemperature": HKQuantityTypeIdentifierBasalBodyTemperature,
+            @"DietaryChromium": HKQuantityTypeIdentifierDietaryChromium,
+            @"ElectrodermalActivity": HKQuantityTypeIdentifierElectrodermalActivity,
+            @"ForcedExpiratoryVolume1": HKQuantityTypeIdentifierForcedExpiratoryVolume1,
+            @"ForcedVitalCapacity": HKQuantityTypeIdentifierForcedVitalCapacity,
+            @"InhalerUsage": HKQuantityTypeIdentifierInhalerUsage,
+            @"NumberOfAlcoholicBeverages": HKQuantityTypeIdentifierNumberOfAlcoholicBeverages,
+            @"NumberOfTimesFallen": HKQuantityTypeIdentifierNumberOfTimesFallen,
+            @"PeripheralPerfusionIndex": HKQuantityTypeIdentifierPeripheralPerfusionIndex,
+            @"PushCount": HKQuantityTypeIdentifierPushCount,
+            @"SixMinuteWalkTestDistance": HKQuantityTypeIdentifierSixMinuteWalkTestDistance,
+            @"StairAscentSpeed": HKQuantityTypeIdentifierStairAscentSpeed,
+            @"StairDescentSpeed": HKQuantityTypeIdentifierStairDescentSpeed,
+            @"SwimmingStrokeCount": HKQuantityTypeIdentifierSwimmingStrokeCount,
+            @"UVExposure": HKQuantityTypeIdentifierUVExposure,
+            @"WalkingAsymmetryPercentage": HKQuantityTypeIdentifierWalkingAsymmetryPercentage,
+            @"WalkingDoubleSupportPercentage": HKQuantityTypeIdentifierWalkingDoubleSupportPercentage,
+            @"WalkingSpeed": HKQuantityTypeIdentifierWalkingSpeed,
+            @"WalkingStepLength": HKQuantityTypeIdentifierWalkingStepLength,
+        }];
+        if (@available(iOS 16.0, *)) {
+            [m addEntriesFromDictionary:@{
+                @"AppleSleepingWristTemperature": HKQuantityTypeIdentifierAppleSleepingWristTemperature,
+                @"AtrialFibrillationBurden": HKQuantityTypeIdentifierAtrialFibrillationBurden,
+                @"EnvironmentalSoundReduction": HKQuantityTypeIdentifierEnvironmentalSoundReduction,
+                @"HeartRateRecoveryOneMinute": HKQuantityTypeIdentifierHeartRateRecoveryOneMinute,
+                @"UnderwaterDepth": HKQuantityTypeIdentifierUnderwaterDepth,
+                @"WaterTemperature": HKQuantityTypeIdentifierWaterTemperature,
+            }];
+        }
+        if (@available(iOS 17.0, *)) {
+            [m addEntriesFromDictionary:@{
+                @"CyclingCadence": HKQuantityTypeIdentifierCyclingCadence,
+                @"CyclingFunctionalThresholdPower": HKQuantityTypeIdentifierCyclingFunctionalThresholdPower,
+                @"CyclingPower": HKQuantityTypeIdentifierCyclingPower,
+                @"CyclingSpeed": HKQuantityTypeIdentifierCyclingSpeed,
+                @"PhysicalEffort": HKQuantityTypeIdentifierPhysicalEffort,
+                @"TimeInDaylight": HKQuantityTypeIdentifierTimeInDaylight,
+            }];
+        }
+        if (@available(iOS 18.0, *)) {
+            [m addEntriesFromDictionary:@{
+                @"AppleSleepingBreathingDisturbances": HKQuantityTypeIdentifierAppleSleepingBreathingDisturbances,
+                @"CrossCountrySkiingSpeed": HKQuantityTypeIdentifierCrossCountrySkiingSpeed,
+                @"DistanceCrossCountrySkiing": HKQuantityTypeIdentifierDistanceCrossCountrySkiing,
+                @"DistancePaddleSports": HKQuantityTypeIdentifierDistancePaddleSports,
+                @"DistanceRowing": HKQuantityTypeIdentifierDistanceRowing,
+                @"DistanceSkatingSports": HKQuantityTypeIdentifierDistanceSkatingSports,
+                @"EstimatedWorkoutEffortScore": HKQuantityTypeIdentifierEstimatedWorkoutEffortScore,
+                @"PaddleSportsSpeed": HKQuantityTypeIdentifierPaddleSportsSpeed,
+                @"RowingSpeed": HKQuantityTypeIdentifierRowingSpeed,
+                @"WorkoutEffortScore": HKQuantityTypeIdentifierWorkoutEffortScore,
+            }];
+        }
+        map = [m copy];
+    });
+    return map;
+}
+
+/*!
+    Category identifiers (symptoms, reproductive health, heart / hearing / mobility events, ...).
+    Names are the HKCategoryTypeIdentifier suffix.
+ */
++ (NSDictionary<NSString *, HKCategoryTypeIdentifier> *)extendedCategoryIdentifiers
+{
+    static NSDictionary *map = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSMutableDictionary *m = [NSMutableDictionary dictionary];
+        [m addEntriesFromDictionary:@{
+            @"AppleStandHour": HKCategoryTypeIdentifierAppleStandHour,
+            @"CervicalMucusQuality": HKCategoryTypeIdentifierCervicalMucusQuality,
+            @"OvulationTestResult": HKCategoryTypeIdentifierOvulationTestResult,
+            @"MenstrualFlow": HKCategoryTypeIdentifierMenstrualFlow,
+            @"IntermenstrualBleeding": HKCategoryTypeIdentifierIntermenstrualBleeding,
+            @"SexualActivity": HKCategoryTypeIdentifierSexualActivity,
+            @"HighHeartRateEvent": HKCategoryTypeIdentifierHighHeartRateEvent,
+            @"LowHeartRateEvent": HKCategoryTypeIdentifierLowHeartRateEvent,
+            @"IrregularHeartRhythmEvent": HKCategoryTypeIdentifierIrregularHeartRhythmEvent,
+            @"AudioExposureEvent": HKCategoryTypeIdentifierAudioExposureEvent,
+            @"ToothbrushingEvent": HKCategoryTypeIdentifierToothbrushingEvent,
+            @"AbdominalCramps": HKCategoryTypeIdentifierAbdominalCramps,
+            @"Acne": HKCategoryTypeIdentifierAcne,
+            @"AppetiteChanges": HKCategoryTypeIdentifierAppetiteChanges,
+            @"GeneralizedBodyAche": HKCategoryTypeIdentifierGeneralizedBodyAche,
+            @"Bloating": HKCategoryTypeIdentifierBloating,
+            @"BreastPain": HKCategoryTypeIdentifierBreastPain,
+            @"ChestTightnessOrPain": HKCategoryTypeIdentifierChestTightnessOrPain,
+            @"Chills": HKCategoryTypeIdentifierChills,
+            @"Constipation": HKCategoryTypeIdentifierConstipation,
+            @"Coughing": HKCategoryTypeIdentifierCoughing,
+            @"Diarrhea": HKCategoryTypeIdentifierDiarrhea,
+            @"Dizziness": HKCategoryTypeIdentifierDizziness,
+            @"Fainting": HKCategoryTypeIdentifierFainting,
+            @"Fatigue": HKCategoryTypeIdentifierFatigue,
+            @"Fever": HKCategoryTypeIdentifierFever,
+            @"Headache": HKCategoryTypeIdentifierHeadache,
+            @"Heartburn": HKCategoryTypeIdentifierHeartburn,
+            @"HotFlashes": HKCategoryTypeIdentifierHotFlashes,
+            @"LowerBackPain": HKCategoryTypeIdentifierLowerBackPain,
+            @"LossOfSmell": HKCategoryTypeIdentifierLossOfSmell,
+            @"LossOfTaste": HKCategoryTypeIdentifierLossOfTaste,
+            @"MoodChanges": HKCategoryTypeIdentifierMoodChanges,
+            @"Nausea": HKCategoryTypeIdentifierNausea,
+            @"PelvicPain": HKCategoryTypeIdentifierPelvicPain,
+            @"RapidPoundingOrFlutteringHeartbeat": HKCategoryTypeIdentifierRapidPoundingOrFlutteringHeartbeat,
+            @"RunnyNose": HKCategoryTypeIdentifierRunnyNose,
+            @"ShortnessOfBreath": HKCategoryTypeIdentifierShortnessOfBreath,
+            @"SinusCongestion": HKCategoryTypeIdentifierSinusCongestion,
+            @"SkippedHeartbeat": HKCategoryTypeIdentifierSkippedHeartbeat,
+            @"SleepChanges": HKCategoryTypeIdentifierSleepChanges,
+            @"SoreThroat": HKCategoryTypeIdentifierSoreThroat,
+            @"Vomiting": HKCategoryTypeIdentifierVomiting,
+            @"Wheezing": HKCategoryTypeIdentifierWheezing,
+            @"BladderIncontinence": HKCategoryTypeIdentifierBladderIncontinence,
+            @"DrySkin": HKCategoryTypeIdentifierDrySkin,
+            @"HairLoss": HKCategoryTypeIdentifierHairLoss,
+            @"VaginalDryness": HKCategoryTypeIdentifierVaginalDryness,
+            @"MemoryLapse": HKCategoryTypeIdentifierMemoryLapse,
+            @"NightSweats": HKCategoryTypeIdentifierNightSweats,
+            @"EnvironmentalAudioExposureEvent": HKCategoryTypeIdentifierEnvironmentalAudioExposureEvent,
+            @"HandwashingEvent": HKCategoryTypeIdentifierHandwashingEvent,
+            @"HeadphoneAudioExposureEvent": HKCategoryTypeIdentifierHeadphoneAudioExposureEvent,
+            @"Pregnancy": HKCategoryTypeIdentifierPregnancy,
+            @"Lactation": HKCategoryTypeIdentifierLactation,
+            @"Contraceptive": HKCategoryTypeIdentifierContraceptive,
+            @"LowCardioFitnessEvent": HKCategoryTypeIdentifierLowCardioFitnessEvent,
+            @"AppleWalkingSteadinessEvent": HKCategoryTypeIdentifierAppleWalkingSteadinessEvent,
+            @"PregnancyTestResult": HKCategoryTypeIdentifierPregnancyTestResult,
+            @"ProgesteroneTestResult": HKCategoryTypeIdentifierProgesteroneTestResult,
+        }];
+        if (@available(iOS 16.0, *)) {
+            [m addEntriesFromDictionary:@{
+                @"InfrequentMenstrualCycles": HKCategoryTypeIdentifierInfrequentMenstrualCycles,
+                @"IrregularMenstrualCycles": HKCategoryTypeIdentifierIrregularMenstrualCycles,
+                @"PersistentIntermenstrualBleeding": HKCategoryTypeIdentifierPersistentIntermenstrualBleeding,
+                @"ProlongedMenstrualPeriods": HKCategoryTypeIdentifierProlongedMenstrualPeriods,
+            }];
+        }
+        if (@available(iOS 18.0, *)) {
+            [m addEntriesFromDictionary:@{
+                @"BleedingAfterPregnancy": HKCategoryTypeIdentifierBleedingAfterPregnancy,
+                @"BleedingDuringPregnancy": HKCategoryTypeIdentifierBleedingDuringPregnancy,
+                @"SleepApneaEvent": HKCategoryTypeIdentifierSleepApneaEvent,
+            }];
+        }
+#if defined(__IPHONE_26_2) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_26_2
+        // Needs the iOS 26.2 SDK (Xcode 26.2) to compile; older toolchains simply skip it.
+        if (@available(iOS 26.2, *)) {
+            [m addEntriesFromDictionary:@{
+                @"HypertensionEvent": HKCategoryTypeIdentifierHypertensionEvent,
+            }];
+        }
+#endif
+        map = [m copy];
+    });
+    return map;
+}
+
++ (nullable HKSampleType *)extendedSampleTypeFromName:(NSString *)name
+{
+    HKQuantityTypeIdentifier quantityIdentifier = [self extendedQuantityIdentifiers][name];
+    if (quantityIdentifier != nil) {
+        return [HKObjectType quantityTypeForIdentifier:quantityIdentifier];
+    }
+    HKCategoryTypeIdentifier categoryIdentifier = [self extendedCategoryIdentifiers][name];
+    if (categoryIdentifier != nil) {
+        return [HKObjectType categoryTypeForIdentifier:categoryIdentifier];
+    }
+    return nil;
+}
+
+/*!
+    Types HealthKit only lets Apple write. Asking for share authorization on one of these makes
+    requestAuthorization fail as a whole, so they are filtered out of the write permissions.
+ */
++ (BOOL)isReadOnlyTypeName:(NSString *)name
+{
+    static NSSet *names = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        names = [NSSet setWithArray:@[
+            @"AppleExerciseTime",
+            @"AppleStandTime",
+            @"AppleMoveTime",
+            @"AppleWalkingSteadiness",
+            @"AppleSleepingWristTemperature",
+            @"AppleSleepingBreathingDisturbances",
+            @"AtrialFibrillationBurden",
+            @"EstimatedWorkoutEffortScore",
+            @"NikeFuel",
+            @"AppleStandHour",
+            @"HighHeartRateEvent",
+            @"LowHeartRateEvent",
+            @"IrregularHeartRhythmEvent",
+            @"AudioExposureEvent",
+            @"EnvironmentalAudioExposureEvent",
+            @"HeadphoneAudioExposureEvent",
+            @"LowCardioFitnessEvent",
+            @"AppleWalkingSteadinessEvent",
+            @"SleepApneaEvent",
+            @"HypertensionEvent",
+            @"MedicationDoseEvent",
+            @"UserAnnotatedMedications",
+        ]];
+    });
+    return [names containsObject:name];
+}
+
+/*!
+    State of Mind / scored assessments (iOS 18) and the Medications API (iOS 26). These are neither
+    quantity nor category types, so they get their own lookup.
+ */
++ (nullable HKObjectType *)wellbeingOrMedicationTypeFromName:(NSString *)name
+{
+#if defined(__IPHONE_18_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_18_0
+    if (@available(iOS 18.0, *)) {
+        if ([name isEqualToString:@"StateOfMind"]) {
+            return [HKObjectType stateOfMindType];
+        } else if ([name isEqualToString:@"GAD7Assessment"]) {
+            return [HKObjectType scoredAssessmentTypeForIdentifier:HKScoredAssessmentTypeIdentifierGAD7];
+        } else if ([name isEqualToString:@"PHQ9Assessment"]) {
+            return [HKObjectType scoredAssessmentTypeForIdentifier:HKScoredAssessmentTypeIdentifierPHQ9];
+        }
+    }
+#endif
+#if defined(__IPHONE_26_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_26_0
+    if (@available(iOS 26.0, *)) {
+        if ([name isEqualToString:@"MedicationDoseEvent"]) {
+            return [HKObjectType medicationDoseEventType];
+        } else if ([name isEqualToString:@"UserAnnotatedMedications"]) {
+            return [HKObjectType userAnnotatedMedicationType];
+        }
+    }
+#endif
+    return nil;
+}
 
 + (NSDictionary *)getStringToWorkoutActivityTypeDictionary {
     NSDictionary *elem = @{
@@ -601,6 +874,9 @@
         @"SocialDance": @(HKWorkoutActivityTypeSocialDance),
         @"Pickleball": @(HKWorkoutActivityTypePickleball),
         @"Cooldown": @(HKWorkoutActivityTypeCooldown),
+        @"SwimBikeRun": @(HKWorkoutActivityTypeSwimBikeRun),
+        @"Transition": @(HKWorkoutActivityTypeTransition),
+        @"UnderwaterDiving": @(HKWorkoutActivityTypeUnderwaterDiving),
         @"Other": @(HKWorkoutActivityTypeOther),
     };
     return elem;

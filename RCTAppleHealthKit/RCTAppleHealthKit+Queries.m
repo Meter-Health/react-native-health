@@ -320,8 +320,8 @@
                 if (type == [HKObjectType workoutType]) {
                     for (HKWorkout *sample in results) {
                         @try {
-                            double energy =  [[sample totalEnergyBurned] doubleValueForUnit:[HKUnit kilocalorieUnit]];
-                            double distance = [[sample totalDistance] doubleValueForUnit:[HKUnit mileUnit]];
+                            double energy = [RCTAppleHealthKit workoutTotalEnergyBurned:sample unit:[HKUnit kilocalorieUnit]];
+                            double distance = [RCTAppleHealthKit workoutTotalDistance:sample unit:[HKUnit mileUnit]];
                             NSString *type = [RCTAppleHealthKit stringForHKWorkoutActivityType:[sample workoutActivityType]];
 
                             NSString *startDateString = [RCTAppleHealthKit buildISO8601StringFromDate:sample.startDate];
@@ -357,6 +357,23 @@
                                                    @"end" : endDateString
                                                    };
 
+                            [data addObject:elem];
+                        } @catch (NSException *exception) {
+                            NSLog(@"RNHealth: An error occured while trying to add sample from: %@ ", [[[sample sourceRevision] source] bundleIdentifier]);
+                        }
+                    }
+                } else if ([type isKindOfClass:[HKCategoryType class]]) {
+                    for (HKCategorySample *sample in results) {
+                        @try {
+                            NSDictionary *elem = @{
+                                @"value" : @(sample.value),
+                                @"tracked" : @([[sample metadata][HKMetadataKeyWasUserEntered] intValue] != 1),
+                                @"sourceName" : [[[sample sourceRevision] source] name],
+                                @"sourceId" : [[[sample sourceRevision] source] bundleIdentifier],
+                                @"device" : [[sample sourceRevision] productType] ?: @"",
+                                @"start" : [RCTAppleHealthKit buildISO8601StringFromDate:sample.startDate],
+                                @"end" : [RCTAppleHealthKit buildISO8601StringFromDate:sample.endDate]
+                            };
                             [data addObject:elem];
                         } @catch (NSException *exception) {
                             NSLog(@"RNHealth: An error occured while trying to add sample from: %@ ", [[[sample sourceRevision] source] bundleIdentifier]);
@@ -512,8 +529,8 @@
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 for (HKWorkout *sample in sampleObjects) {
                     @try {
-                        double energy =  [[sample totalEnergyBurned] doubleValueForUnit:[HKUnit kilocalorieUnit]];
-                        double distance = [[sample totalDistance] doubleValueForUnit:[HKUnit mileUnit]];
+                        double energy = [RCTAppleHealthKit workoutTotalEnergyBurned:sample unit:[HKUnit kilocalorieUnit]];
+                        double distance = [RCTAppleHealthKit workoutTotalDistance:sample unit:[HKUnit mileUnit]];
                         NSString *type = [RCTAppleHealthKit stringForHKWorkoutActivityType:[sample workoutActivityType]];
                         NSArray *workoutEvents = [RCTAppleHealthKit formatWorkoutEvents:[sample workoutEvents]];
                         NSTimeInterval duration = [sample duration];
@@ -1010,55 +1027,6 @@
     [self.healthStore executeQuery:query];
 }
 
- - (void)fetchWorkoutForPredicate:(NSPredicate *)predicate
-                        ascending:(BOOL)ascending
-                            limit:(NSUInteger)limit
-                       completion:(void (^)(NSArray *, NSError *))completion {
-
-    void (^handlerBlock)(HKSampleQuery *query, NSArray *results, NSError *error);
-    NSSortDescriptor *endDateSortDescriptor = [[NSSortDescriptor alloc] initWithKey:HKSampleSortIdentifierEndDate ascending:ascending];
-    handlerBlock = ^(HKSampleQuery *query, NSArray *results, NSError *error) {
-        if(!results) {
-            if(completion) {
-                completion(nil, error);
-            }
-            return;
-        }
-
-        if(completion) {
-            NSMutableArray *data = [NSMutableArray arrayWithCapacity:1];
-            NSDictionary *numberToWorkoutNameDictionary = [RCTAppleHealthKit getNumberToWorkoutNameDictionary];
-
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                for (HKWorkout * sample in results) {
-                    double energy = [[sample totalEnergyBurned] doubleValueForUnit:[HKUnit kilocalorieUnit]];
-                    double distance = [[sample totalDistance] doubleValueForUnit:[HKUnit mileUnit]];
-                    NSNumber *activityNumber =  [NSNumber numberWithInt: [sample workoutActivityType]];
-
-                    NSString *activityName = [numberToWorkoutNameDictionary objectForKey: activityNumber];
-
-                    if (activityName) {
-                        NSDictionary *elem = @{
-                            @"activityName" : activityName,
-                            @"calories" : @(energy),
-                            @"distance" : @(distance),
-                            @"startDate" : [RCTAppleHealthKit buildISO8601StringFromDate:sample.startDate],
-                            @"endDate" : [RCTAppleHealthKit buildISO8601StringFromDate:sample.endDate]
-                        };
-                        [data addObject:elem];
-                    }
-                }
-                completion(data, error);
-            });
-
-        }
-    };
-
-    HKSampleQuery *query = [[HKSampleQuery alloc] initWithSampleType:[HKObjectType workoutType] predicate:predicate limit:limit sortDescriptors:@[endDateSortDescriptor] resultsHandler:handlerBlock];
-
-    [self.healthStore executeQuery:query];
-}
-
 /*!
     Set background observer for the given HealthKit sample type. This method should only be called by
     the native code and not injected by any Javascript code, as that might imply in unstable behavior
@@ -1121,12 +1089,9 @@
 
     @param sampleType The type of samples to add a listener for
     @param type A human readable description for the sample type
-    @param bridge React Native bridge instance
  */
-- (void)setObserverForType:(HKSampleType *)sampleType
-                      type:(NSString *)type
-                    bridge:(RCTBridge *)bridge
-                    hasListeners:(bool)hasListeners
+- (void)registerBackgroundObserverForType:(HKSampleType *)sampleType
+                                     type:(NSString *)type
 {
     HKObserverQuery* query = [
         [HKObserverQuery alloc] initWithSampleType:sampleType

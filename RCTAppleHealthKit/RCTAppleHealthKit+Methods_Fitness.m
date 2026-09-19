@@ -9,6 +9,7 @@
 #import "RCTAppleHealthKit+Methods_Fitness.h"
 #import "RCTAppleHealthKit+Queries.h"
 #import "RCTAppleHealthKit+Utils.h"
+#import "RCTAppleHealthKit+TypesAndPermissions.h"
 
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventDispatcher.h>
@@ -62,6 +63,17 @@
     NSPredicate *predicate = [HKQuery predicateForSamplesWithStartDate:startDate endDate:endDate options:HKQueryOptionStrictStartDate];
 
     HKSampleType *samplesType = [RCTAppleHealthKit quantityTypeFromName:type];
+    if (samplesType == nil) {
+        // Fall back to the permission names, so every readable quantity / category type works here.
+        HKObjectType *permissionType = [self getReadPermFromText:type];
+        if ([permissionType isKindOfClass:[HKSampleType class]]) {
+            samplesType = (HKSampleType *)permissionType;
+        }
+    }
+    if (samplesType == nil) {
+        callback(@[RCTMakeError([NSString stringWithFormat:@"Unknown sample type: %@", type], nil, nil)]);
+        return;
+    }
 
     void (^completion)(NSArray *results, NSError *error);
 
@@ -81,6 +93,9 @@
 
     if ([type isEqual:@"Running"] || [type isEqual:@"Cycling"]) {
         unit = [HKUnit mileUnit];
+    }
+    if ([samplesType isKindOfClass:[HKQuantityType class]] && ![(HKQuantityType *)samplesType isCompatibleWithUnit:unit]) {
+        unit = [RCTAppleHealthKit defaultUnitForQuantityType:(HKQuantityType *)samplesType];
     }
 
     [self fetchSamplesOfType:samplesType
@@ -450,6 +465,10 @@
 
     NSString *type = [RCTAppleHealthKit stringFromOptions:input key:@"type" withDefault:@"Walking"];
     HKSampleType *sampleType = [RCTAppleHealthKit quantityTypeFromName:type];
+    if (sampleType == nil) {
+        RCTLogWarn(@"[HealthKit] Cannot observe unknown type %@", type);
+        return;
+    }
 
     [self setObserverForType:sampleType type:type];
 }
@@ -460,12 +479,14 @@
     @param type Human Readable type
  */
 - (void)fitness_registerObserver:(NSString *)type
-                          bridge:(RCTBridge *)bridge
-                    hasListeners:(bool)hasListeners
 {
     HKSampleType *sampleType = [RCTAppleHealthKit quantityTypeFromName:type];
+    if (sampleType == nil) {
+        NSLog(@"[HealthKit] Cannot observe unknown type %@", type);
+        return;
+    }
 
-    [self setObserverForType:sampleType type:type bridge:bridge hasListeners:hasListeners];
+    [self registerBackgroundObserverForType:sampleType type:type];
 }
 
 @end

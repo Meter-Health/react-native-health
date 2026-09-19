@@ -18,7 +18,7 @@
 - (void)results_deleteCarbohydratesSample:(NSString *)oid callback:(RCTResponseSenderBlock)callback;
 - (void)results_saveInsulinDeliverySample:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
 - (void)results_deleteInsulinDeliverySample:(NSString *)oid callback:(RCTResponseSenderBlock)callback;
-- (void)results_registerObservers:(RCTBridge *)bridge hasListeners:(bool)hasListeners;
+- (void)results_registerObservers;
 - (void)deleteSamplesByType:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
 
 @end

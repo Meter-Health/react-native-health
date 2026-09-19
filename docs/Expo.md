@@ -28,6 +28,7 @@ The plugin provides props for extra customization. Every time you change the pro
 - `healthUpdatePermission` (_string_): Sets the iOS `NSHealthUpdateUsageDescription` permission message to the `Info.plist`. Defaults to `Allow $(PRODUCT_NAME) to update health info`.
 - `isClinicalDataEnabled` (_boolean_): Adds `health-records` to the `com.apple.developer.healthkit.access` entitlement in the iOS project. Defaults to false.
 - `healthClinicalDescription` (_string_): Sets the iOS `NSHealthClinicalHealthRecordsShareUsageDescription` permission message to the `Info.plist`. Defaults to `Allow $(PRODUCT_NAME) to check health info`.
+- `enableBackgroundObservers` (_boolean_): Registers the HealthKit [background observers](./background.md) at app launch by adding `RCTAppleHealthKit().initializeBackgroundObservers()` to the generated `AppDelegate` (Swift or Objective-C) and enables the `com.apple.developer.healthkit.background-delivery` entitlement. Defaults to false.
 
 `app.config.js`
 
@@ -41,7 +42,8 @@ The plugin provides props for extra customization. Every time you change the pro
           "isClinicalDataEnabled": true,
           "healthSharePermission": "Custom health share permission",
           "healthUpdatePermission": "Custom health update permission",
-          "healthClinicalDescription": "Custom health share permission for clinical data"
+          "healthClinicalDescription": "Custom health share permission for clinical data",
+          "enableBackgroundObservers": true
         }
       ]
     ]
@@ -51,7 +53,9 @@ The plugin provides props for extra customization. Every time you change the pro
 
 ## Background Processing
 
-Background processing is not currently supported by this plugin.
+Set `enableBackgroundObservers: true` (see above) and rebuild the native app. The
+plugin adds the AppDelegate call for you; subscribe to the events from JS as
+described in [background observers](./background.md).
 
 ## Capabilities
 

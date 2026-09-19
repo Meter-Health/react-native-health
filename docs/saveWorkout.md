@@ -4,6 +4,12 @@ Save workout to Healthkit
 
 `saveWorkout` accepts an options object containing type, startDate, endDate, energyBurned and distance
 
+The workout is created with `HKWorkoutBuilder`. `energyBurned` and `distance` are stored as
+samples attached to the workout, so besides the `Workout` write permission the app needs write
+access to `ActiveEnergyBurned` (when `energyBurned` is set) and to the distance type matching the
+activity (`DistanceWalkingRunning` by default; `DistanceCycling`, `DistanceSwimming`,
+`DistanceWheelchair` or `DistanceDownhillSnowSports` for the corresponding activities).
+
 Example input options:
 
 ```javascript

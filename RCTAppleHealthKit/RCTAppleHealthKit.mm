@@ -1,5 +1,5 @@
 //
-//  RCTAppleHealthKit.m
+//  RCTAppleHealthKit.mm
 //  RCTAppleHealthKit
 //
 //  This source code is licensed under the MIT-style license found in the
@@ -23,18 +23,32 @@
 #import "RCTAppleHealthKit+Methods_Hearing.h"
 #import "RCTAppleHealthKit+Methods_Summary.h"
 #import "RCTAppleHealthKit+Methods_ClinicalRecords.h"
+#import "RCTAppleHealthKit+Methods_MentalWellbeing.h"
+#import "RCTAppleHealthKit+Methods_Medications.h"
 
 #import <React/RCTBridgeModule.h>
-#import <React/RCTEventDispatcher.h>
+
+#ifdef RCT_NEW_ARCH_ENABLED
+#import <RNAppleHealthKitSpec/RNAppleHealthKitSpec.h>
+
+// The spec conformance lives here (not in the public header) because the
+// generated spec header is Objective-C++ and would break Swift / plain ObjC
+// consumers of RCTAppleHealthKit.h.
+@interface RCTAppleHealthKit () <NativeAppleHealthKitSpec>
+@end
+#endif
 
 
 @implementation RCTAppleHealthKit
 
-bool hasListeners;
-
-RCT_EXPORT_MODULE();
+RCT_EXPORT_MODULE(AppleHealthKit);
 
 
+/*!
+    The module is a singleton so that the instance created by the host app for
+    `initializeBackgroundObservers` is the same one React Native (bridge or
+    TurboModule) instantiates and wires up for event emission.
+ */
 + (id)allocWithZone:(NSZone *)zone {
     static RCTAppleHealthKit *sharedInstance = nil;
     static dispatch_once_t onceToken;
@@ -44,24 +58,17 @@ RCT_EXPORT_MODULE();
     return sharedInstance;
 }
 
-+ (RCTCallableJSModules *)sharedJsModule {
-    static RCTCallableJSModules *sharedJsModule = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        sharedJsModule = [RCTCallableJSModules new];
-    });
-    return sharedJsModule;
-}
-
-- (id) init
-{
-    return [super init];
-}
-
 + (BOOL)requiresMainQueueSetup
 {
     return NO;
 }
+
+#ifdef RCT_NEW_ARCH_ENABLED
+- (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:(const facebook::react::ObjCTurboModuleInitParams &)params
+{
+    return std::make_shared<facebook::react::NativeAppleHealthKitSpecJSI>(params);
+}
+#endif
 
 RCT_EXPORT_METHOD(isAvailable:(RCTResponseSenderBlock)callback)
 {
@@ -76,7 +83,7 @@ RCT_EXPORT_METHOD(initHealthKit:(NSDictionary *)input callback:(RCTResponseSende
 RCT_EXPORT_METHOD(initStepCountObserver:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
 {
     [self _initializeHealthStore];
-    [self fitness_initializeStepEventObserver:input hasListeners:hasListeners callback:callback];
+    [self fitness_initializeStepEventObserver:input callback:callback];
 }
 
 RCT_EXPORT_METHOD(getBiologicalSex:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
@@ -648,6 +655,42 @@ RCT_EXPORT_METHOD(deleteSamplesByType:(NSDictionary *)input callback:(RCTRespons
     [self deleteSamplesByType:input callback:callback];
 }
 
+RCT_EXPORT_METHOD(getStateOfMindSamples:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self _initializeHealthStore];
+    [self mentalWellbeing_getStateOfMindSamples:input callback:callback];
+}
+
+RCT_EXPORT_METHOD(saveStateOfMind:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self _initializeHealthStore];
+    [self mentalWellbeing_saveStateOfMind:input callback:callback];
+}
+
+RCT_EXPORT_METHOD(getScoredAssessments:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self _initializeHealthStore];
+    [self mentalWellbeing_getScoredAssessments:input callback:callback];
+}
+
+RCT_EXPORT_METHOD(saveScoredAssessment:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self _initializeHealthStore];
+    [self mentalWellbeing_saveScoredAssessment:input callback:callback];
+}
+
+RCT_EXPORT_METHOD(getUserAnnotatedMedications:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self _initializeHealthStore];
+    [self medications_getUserAnnotatedMedications:input callback:callback];
+}
+
+RCT_EXPORT_METHOD(getMedicationDoseEvents:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self _initializeHealthStore];
+    [self medications_getMedicationDoseEvents:input callback:callback];
+}
+
 - (HKHealthStore *)_initializeHealthStore {
   if(![self healthStore]) {
     self.healthStore = [[HKHealthStore alloc] init];
@@ -751,8 +794,8 @@ RCT_EXPORT_METHOD(deleteSamplesByType:(NSDictionary *)input callback:(RCTRespons
     NSMutableArray *supportedEvents = [[NSMutableArray alloc] init];
 
     for(NSString * type in types) {
-        for(NSString * template in templates) {
-            NSString *successEvent = [NSString stringWithFormat:template, type];
+        for(NSString * eventTemplate in templates) {
+            NSString *successEvent = [NSString stringWithFormat:eventTemplate, type];
             [supportedEvents addObject: successEvent];
         }
     }
@@ -816,13 +859,12 @@ RCT_EXPORT_METHOD(deleteSamplesByType:(NSDictionary *)input callback:(RCTRespons
     Initialize background delivery for the specified types. This allows for HealthKit to notify the app when a new
     sample of data is added to it
 
-    This method must be called at the application:didFinishLaunchingWithOptions: method, in AppDelegate.m
+    This method must be called at app launch (`application:didFinishLaunchingWithOptions:` in AppDelegate).
+    Events are delivered through the React Native event emitter once JS has subscribed via NativeEventEmitter.
  */
-  - (void)initializeBackgroundObservers:(RCTBridge *)bridge
+- (void)initializeBackgroundObservers
 {
     [self _initializeHealthStore];
-
-    self.bridge = bridge;
 
     if ([HKHealthStore isHealthDataAvailable]) {
         NSArray *fitnessObservers = @[
@@ -844,9 +886,9 @@ RCT_EXPORT_METHOD(deleteSamplesByType:(NSDictionary *)input callback:(RCTRespons
         ];
 
         for(NSString * type in fitnessObservers) {
-            [self fitness_registerObserver:type bridge:bridge hasListeners:hasListeners];
+            [self fitness_registerObserver:type];
         }
-        
+
         NSArray *clinicalObservers = @[
             @"AllergyRecord",
             @"ConditionRecord",
@@ -857,12 +899,12 @@ RCT_EXPORT_METHOD(deleteSamplesByType:(NSDictionary *)input callback:(RCTRespons
             @"ProcedureRecord",
             @"VitalSignRecord"
         ];
-        
+
         for(NSString * type in clinicalObservers) {
-            [self clinical_registerObserver:type bridge:bridge hasListeners:hasListeners];
+            [self clinical_registerObserver:type];
         }
-        
-        [self results_registerObservers:bridge hasListeners:hasListeners];
+
+        [self results_registerObservers];
 
         NSLog(@"[HealthKit] Background observers added to the app");
         [self startObserving];
@@ -871,31 +913,42 @@ RCT_EXPORT_METHOD(deleteSamplesByType:(NSDictionary *)input callback:(RCTRespons
     }
 }
 
+- (void)initializeBackgroundObservers:(RCTBridge *)bridge
+{
+    // The bridge is no longer needed (and is nil in bridgeless mode); kept for source compatibility.
+    [self initializeBackgroundObservers];
+}
+
 // Will be called when this module's first listener is added.
 -(void)startObserving {
     NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
-        for (NSString *notificationName in [self supportedEvents]) {
-            [center addObserver:self
+    // This can run twice (once from initializeBackgroundObservers, once when JS adds its first
+    // listener); drop any previous registration so events are not emitted twice.
+    [center removeObserver:self];
+    for (NSString *notificationName in [self supportedEvents]) {
+        [center addObserver:self
                    selector:@selector(emitEventInternal:)
                        name:notificationName
                      object:nil];
-        }
+    }
     self.hasListeners = YES;
 }
 
 - (void)emitEventInternal:(NSNotification *)notification {
-  if (self.hasListeners) {
-    self.callableJSModules = [RCTAppleHealthKit sharedJsModule];
-    [self.callableJSModules setBridge:self.bridge];
-    [self sendEventWithName:notification.name
-                   body:notification.userInfo];
-  }
+    // RCTEventEmitter is wired to JS by React Native itself (bridge or TurboModule manager),
+    // so no manual RCTCallableJSModules / bridge plumbing is needed here. callableJSModules is
+    // nil until React Native has instantiated the module: observers registered at app launch
+    // can fire before that, and sendEventWithName asserts in that case.
+    if (self.hasListeners && self.callableJSModules != nil) {
+        [self sendEventWithName:notification.name
+                           body:notification.userInfo];
+    }
 }
 
 - (void)emitEventWithName:(NSString *)name andPayload:(NSDictionary *)payload {
     [[NSNotificationCenter defaultCenter] postNotificationName:name
-                                                    object:self
-                                                  userInfo:payload];
+                                                        object:self
+                                                      userInfo:payload];
 }
 
 // Will be called when this module's last listener is removed, or on dealloc.

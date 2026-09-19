@@ -25,49 +25,58 @@ following:
 
 ### Initialization
 
-If you followed the [Background Processing](https://github.com/agencyenterprise/react-native-health#background-processing)
+If you followed the [Background Processing](https://github.com/Meter-Health/react-native-health#background-processing)
 step in the README, you can skip this one.
 
-To setup that in your project, in XCode open your `ios/AppDelegate.m` file and add the
-following statements:
+Register the observers once at app launch, from `application:didFinishLaunchingWithOptions:`.
 
+`AppDelegate.swift` (React Native 0.77+ template):
+
+```swift
+import RNAppleHealthKit
+
+@main
+class AppDelegate: RCTAppDelegate {
+  override func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+  ) -> Bool {
+    /* Add Background initializer for HealthKit */
+    RCTAppleHealthKit().initializeBackgroundObservers()
+
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+}
+```
+
+`AppDelegate.mm` (Objective-C):
 
 ```objective-c
-#import "AppDelegate.h"
-
-...
-
-/* Add the library import at the top of AppDelegate.m */
-#import "RCTAppleHealthKit.h"
-
-...
-
-@implementation AppDelegate
+#import <RNAppleHealthKit/RCTAppleHealthKit.h>
 
 - (BOOL)application:(UIApplication *)application
     didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+  /* Add Background initializer for HealthKit */
+  [[RCTAppleHealthKit new] initializeBackgroundObservers];
 
-  RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self
-                                            launchOptions:launchOptions];
-
-  ...
-
-  /* Add Background initializer for HealthKit  */
-  [[RCTAppleHealthKit new] initializeBackgroundObservers:bridge];
-
-  ...
-
-  return YES;
+  return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 ```
+
+Expo: set `enableBackgroundObservers: true` on the config plugin instead of editing
+the AppDelegate (see [Expo](./Expo.md)).
+
+Also enable the HealthKit **Background Delivery** capability for the app target
+(`com.apple.developer.healthkit.background-delivery` entitlement); without it iOS
+will not wake the app for new samples.
 
 After that, your app is ready to start listening for data updates using the
 React Native client.
 
 ### Handling the updates
 
-This library send events to your app through the React Native bridge. To
-intercept those, you should use the `NativeAppEventEmitter`.
+This library sends events to your app through the module's event emitter. To
+intercept those, subscribe with a `NativeEventEmitter` created from the module.
 
 They follow events are triggered by the library
 
@@ -94,13 +103,14 @@ import React, { useEffect } from 'react';
 import { NativeEventEmitter, NativeModules } from 'react-native';
 
 useEffect(() => {
-    new NativeEventEmitter(NativeModules.AppleHealthKit).addListener(
-      'healthKit:HeartRate:new',
-      async () => {
-        console.log('--> observer triggered');
-      },
-    );
+  const subscription = new NativeEventEmitter(
+    NativeModules.AppleHealthKit,
+  ).addListener('healthKit:HeartRate:new', async () => {
+    console.log('--> observer triggered');
   });
+
+  return () => subscription.remove();
+}, []);
 ```
 
 When a new sample appears, in order to get the information you need to call

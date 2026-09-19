@@ -75,4 +75,8 @@ The following activities are supported by the library
   TaiChi
   MixedCardio
   HandCycling
+  SwimBikeRun
+  Transition
+  UnderwaterDiving
+  Other
 ```

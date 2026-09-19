@@ -226,7 +226,7 @@ NSString * const kMetadataKey = @"metadata";
         return [HKObjectType workoutType];
     }
 
-    return [HKObjectType workoutType];
+    return [RCTAppleHealthKit extendedSampleTypeFromName:type];
 }
 
 + (HKSampleType *)clinicalTypeFromName:(NSString *)type {
@@ -354,12 +354,113 @@ NSString * const kMetadataKey = @"metadata";
       HKUnit *min = [HKUnit minuteUnit];
       theUnit = [ml unitDividedByUnit:[kg unitMultipliedByUnit:min]];
     }
+    if ([unitString isEqualToString:@"kilocalorie"]) {
+         theUnit = [HKUnit kilocalorieUnit];
+    }
+    if ([unitString isEqualToString:@"kilometer"]) {
+         theUnit = [HKUnit meterUnitWithMetricPrefix:HKMetricPrefixKilo];
+    }
+    if ([unitString isEqualToString:@"liter"]) {
+         theUnit = [HKUnit literUnit];
+    }
+    if ([unitString isEqualToString:@"milliliter"]) {
+         theUnit = [HKUnit literUnitWithMetricPrefix:HKMetricPrefixMilli];
+    }
+    if ([unitString isEqualToString:@"milligram"]) {
+         theUnit = [HKUnit gramUnitWithMetricPrefix:HKMetricPrefixMilli];
+    }
+    if ([unitString isEqualToString:@"microgram"]) {
+         theUnit = [HKUnit gramUnitWithMetricPrefix:HKMetricPrefixMicro];
+    }
+    if ([unitString isEqualToString:@"watt"]) {
+         if (@available(iOS 16.0, *)) {
+             theUnit = [HKUnit wattUnit];
+         }
+    }
+    if ([unitString isEqualToString:@"rpm"]) {
+         theUnit = [[HKUnit countUnit] unitDividedByUnit:[HKUnit minuteUnit]];
+    }
+    if ([unitString isEqualToString:@"meterPerSecond"]) {
+         theUnit = [[HKUnit meterUnit] unitDividedByUnit:[HKUnit secondUnit]];
+    }
+    if ([unitString isEqualToString:@"kmPerHour"]) {
+         theUnit = [[HKUnit meterUnitWithMetricPrefix:HKMetricPrefixKilo] unitDividedByUnit:[HKUnit hourUnit]];
+    }
+    if ([unitString isEqualToString:@"milePerHour"]) {
+         theUnit = [[HKUnit mileUnit] unitDividedByUnit:[HKUnit hourUnit]];
+    }
+    if ([unitString isEqualToString:@"kcalPerKgHour"]) {
+         // PhysicalEffort (MET-equivalent)
+         HKUnit *kg = [HKUnit gramUnitWithMetricPrefix:HKMetricPrefixKilo];
+         theUnit = [[HKUnit kilocalorieUnit] unitDividedByUnit:[kg unitMultipliedByUnit:[HKUnit hourUnit]]];
+    }
+    if ([unitString isEqualToString:@"decibel"]) {
+         theUnit = [HKUnit decibelAWeightedSoundPressureLevelUnit];
+    }
+    if ([unitString isEqualToString:@"microsiemens"]) {
+         theUnit = [HKUnit siemensUnitWithMetricPrefix:HKMetricPrefixMicro];
+    }
+    if ([unitString isEqualToString:@"appleEffortScore"]) {
+         if (@available(iOS 18.0, *)) {
+             theUnit = [HKUnit appleEffortScoreUnit];
+         }
+    }
+
+    // Escape hatch: any HealthKit unit string (e.g. "kcal/(kg*hr)", "m/s", "W") is accepted as-is.
+    if (theUnit == nil && unitString.length > 0) {
+        @try {
+            theUnit = [HKUnit unitFromString:unitString];
+        } @catch (NSException *exception) {
+            theUnit = nil;
+        }
+    }
 
     if(theUnit == nil){
         theUnit = defaultValue;
     }
 
     return theUnit;
+}
+
+/*!
+    A unit the given quantity type can be expressed in, used when the caller did not pass one (or
+    passed one that does not fit the type). Candidates are tried in order, so the common types get
+    the unit people expect (count, meters, kcal, bpm, percent, ...).
+ */
++ (HKUnit *)defaultUnitForQuantityType:(HKQuantityType *)quantityType
+{
+    NSMutableArray<HKUnit *> *candidates = [NSMutableArray arrayWithArray:@[
+        [HKUnit countUnit],
+        [HKUnit meterUnit],
+        [HKUnit kilocalorieUnit],
+        [[HKUnit countUnit] unitDividedByUnit:[HKUnit minuteUnit]],
+        [HKUnit percentUnit],
+        [HKUnit minuteUnit],
+        [HKUnit degreeCelsiusUnit],
+        [[HKUnit meterUnit] unitDividedByUnit:[HKUnit secondUnit]],
+        [HKUnit literUnit],
+        [HKUnit gramUnit],
+        [HKUnit millimeterOfMercuryUnit],
+        [HKUnit decibelAWeightedSoundPressureLevelUnit],
+        [HKUnit siemensUnitWithMetricPrefix:HKMetricPrefixMicro],
+        [[HKUnit kilocalorieUnit] unitDividedByUnit:[[HKUnit gramUnitWithMetricPrefix:HKMetricPrefixKilo] unitMultipliedByUnit:[HKUnit hourUnit]]],
+        [HKUnit internationalUnit],
+        [[HKUnit literUnitWithMetricPrefix:HKMetricPrefixMilli] unitDividedByUnit:[[HKUnit gramUnitWithMetricPrefix:HKMetricPrefixKilo] unitMultipliedByUnit:[HKUnit minuteUnit]]],
+        [[HKUnit moleUnitWithMetricPrefix:HKMetricPrefixMilli molarMass:HKUnitMolarMassBloodGlucose] unitDividedByUnit:[HKUnit literUnit]],
+        [HKUnit secondUnit],
+    ]];
+    if (@available(iOS 16.0, *)) {
+        [candidates addObject:[HKUnit wattUnit]];
+    }
+    if (@available(iOS 18.0, *)) {
+        [candidates addObject:[HKUnit appleEffortScoreUnit]];
+    }
+    for (HKUnit *unit in candidates) {
+        if ([quantityType isCompatibleWithUnit:unit]) {
+            return unit;
+        }
+    }
+    return [HKUnit countUnit];
 }
 
 
@@ -624,9 +725,126 @@ NSString * const kMetadataKey = @"metadata";
             return @"MixedCardio";
         case HKWorkoutActivityTypeHandCycling:
             return @"HandCycling";
+        case HKWorkoutActivityTypeSwimBikeRun:
+            return @"SwimBikeRun";
+        case HKWorkoutActivityTypeTransition:
+            return @"Transition";
+        case HKWorkoutActivityTypeUnderwaterDiving:
+            return @"UnderwaterDiving";
         default:
             return @"Other";
     }
+}
+
+/*!
+    HKWorkout.totalEnergyBurned / totalDistance are deprecated since iOS 18. On iOS 16+ the same
+    value is available through the workout statistics; the deprecated accessors are only used
+    on older systems.
+ */
++ (double)workoutSumForQuantityType:(HKQuantityType *)quantityType
+                            workout:(HKWorkout *)workout
+                               unit:(HKUnit *)unit
+                           fallback:(HKQuantity *)fallback
+{
+    HKQuantity *quantity = nil;
+    if (@available(iOS 16.0, *)) {
+        quantity = [[workout statisticsForType:quantityType] sumQuantity];
+    }
+    if (quantity == nil) {
+        quantity = fallback;
+    }
+    if (quantity == nil || ![quantity isCompatibleWithUnit:unit]) {
+        return 0;
+    }
+    return [quantity doubleValueForUnit:unit];
+}
+
++ (double)workoutTotalEnergyBurned:(HKWorkout *)workout unit:(HKUnit *)unit
+{
+    HKQuantity *fallback = nil;
+    if (@available(iOS 18.0, *)) {
+        // Workout statistics are the source of truth from iOS 18 on; nothing to fall back to.
+    } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        fallback = [workout totalEnergyBurned];
+#pragma clang diagnostic pop
+    }
+    return [self workoutSumForQuantityType:[HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierActiveEnergyBurned]
+                                   workout:workout
+                                      unit:unit
+                                  fallback:fallback];
+}
+
++ (double)workoutTotalDistance:(HKWorkout *)workout unit:(HKUnit *)unit
+{
+    HKQuantity *fallback = nil;
+    if (@available(iOS 18.0, *)) {
+        // See workoutTotalEnergyBurned:unit:
+    } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        fallback = [workout totalDistance];
+#pragma clang diagnostic pop
+    }
+    HKQuantityType *distanceType = [self distanceQuantityTypeForWorkoutActivityType:[workout workoutActivityType]];
+    return [self workoutSumForQuantityType:distanceType workout:workout unit:unit fallback:fallback];
+}
+
+/*!
+    The distance quantity type HealthKit associates with a workout activity. Mirrors what the
+    Workout app records, so saved and read distances line up with Apple Health.
+ */
++ (HKQuantityType *)distanceQuantityTypeForWorkoutActivityType:(HKWorkoutActivityType)activityType
+{
+    NSString *identifier;
+    switch (activityType) {
+        case HKWorkoutActivityTypeCycling:
+        case HKWorkoutActivityTypeHandCycling:
+            identifier = HKQuantityTypeIdentifierDistanceCycling;
+            break;
+        case HKWorkoutActivityTypeSwimming:
+        case HKWorkoutActivityTypeWaterFitness:
+        case HKWorkoutActivityTypeWaterPolo:
+        case HKWorkoutActivityTypeWaterSports:
+            identifier = HKQuantityTypeIdentifierDistanceSwimming;
+            break;
+        case HKWorkoutActivityTypeWheelchairWalkPace:
+        case HKWorkoutActivityTypeWheelchairRunPace:
+            identifier = HKQuantityTypeIdentifierDistanceWheelchair;
+            break;
+        case HKWorkoutActivityTypeDownhillSkiing:
+        case HKWorkoutActivityTypeSnowboarding:
+            identifier = HKQuantityTypeIdentifierDistanceDownhillSnowSports;
+            break;
+        default:
+            identifier = HKQuantityTypeIdentifierDistanceWalkingRunning;
+            break;
+    }
+    return [HKQuantityType quantityTypeForIdentifier:identifier];
+}
+
+/*!
+    HealthKit metadata can hold NSDate / HKQuantity values that cannot cross the bridge; convert
+    them to strings and keep strings and numbers as they are.
+ */
++ (NSDictionary *)jsonSafeMetadata:(NSDictionary *)metadata
+{
+    NSMutableDictionary *safe = [NSMutableDictionary dictionaryWithCapacity:metadata.count];
+    for (id key in metadata) {
+        if (![key isKindOfClass:[NSString class]]) {
+            continue;
+        }
+        id value = metadata[key];
+        if ([value isKindOfClass:[NSString class]] || [value isKindOfClass:[NSNumber class]]) {
+            safe[key] = value;
+        } else if ([value isKindOfClass:[NSDate class]]) {
+            safe[key] = [RCTAppleHealthKit buildISO8601StringFromDate:value];
+        } else if (value != nil) {
+            safe[key] = [value description];
+        }
+    }
+    return safe;
 }
 
 @end

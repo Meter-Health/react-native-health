@@ -25,7 +25,11 @@
 - (void)initializeHealthKit:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
 - (void)getModuleInfo:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
 - (void)getAuthorizationStatus:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
-- (void)initializeBackgroundObservers:(RCTBridge *)bridge;
+/// Registers HealthKit background delivery observers. Call once at app launch, e.g. from
+/// `application:didFinishLaunchingWithOptions:` (Swift: `RCTAppleHealthKit().initializeBackgroundObservers()`).
+- (void)initializeBackgroundObservers;
+/// Kept for source compatibility with the legacy bridge; the bridge argument is ignored.
+- (void)initializeBackgroundObservers:(RCTBridge *)bridge __deprecated_msg("Use -initializeBackgroundObservers (no bridge argument).");
 - (void)emitEventWithName:(NSString *)name andPayload:(NSDictionary *)payload;
 
 @end

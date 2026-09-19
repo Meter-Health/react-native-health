@@ -750,6 +750,10 @@ declare module 'react-native-health' {
     TaiChi = 'TaiChi',
     MixedCardio = 'MixedCardio',
     HandCycling = 'HandCycling',
+    SwimBikeRun = 'SwimBikeRun',
+    Transition = 'Transition',
+    UnderwaterDiving = 'UnderwaterDiving',
+    Other = 'Other',
   }
 
   export enum HealthPermission {
@@ -822,6 +826,8 @@ declare module 'react-native-health' {
     DistanceCycling = 'DistanceCycling',
     DistanceSwimming = 'DistanceSwimming',
     DistanceWalkingRunning = 'DistanceWalkingRunning',
+    DistanceWheelchair = 'DistanceWheelchair',
+    DistanceDownhillSnowSports = 'DistanceDownhillSnowSports',
     Electrocardiogram = 'Electrocardiogram',
     FlightsClimbed = 'FlightsClimbed',
     HeartbeatSeries = 'HeartbeatSeries',
@@ -848,6 +854,122 @@ declare module 'react-native-health' {
     RunningStrideLength = 'RunningStrideLength',
     RunningVerticalOscillation = 'RunningVerticalOscillation',
     RunningGroundContactTime = 'RunningGroundContactTime',
+    AbdominalCramps = 'AbdominalCramps',
+    Acne = 'Acne',
+    AppetiteChanges = 'AppetiteChanges',
+    AppleMoveTime = 'AppleMoveTime',
+    AppleSleepingBreathingDisturbances = 'AppleSleepingBreathingDisturbances',
+    AppleSleepingWristTemperature = 'AppleSleepingWristTemperature',
+    AppleStandHour = 'AppleStandHour',
+    AppleWalkingSteadiness = 'AppleWalkingSteadiness',
+    AppleWalkingSteadinessEvent = 'AppleWalkingSteadinessEvent',
+    AtrialFibrillationBurden = 'AtrialFibrillationBurden',
+    AudioExposureEvent = 'AudioExposureEvent',
+    BasalBodyTemperature = 'BasalBodyTemperature',
+    BladderIncontinence = 'BladderIncontinence',
+    BleedingAfterPregnancy = 'BleedingAfterPregnancy',
+    BleedingDuringPregnancy = 'BleedingDuringPregnancy',
+    Bloating = 'Bloating',
+    BreastPain = 'BreastPain',
+    CervicalMucusQuality = 'CervicalMucusQuality',
+    ChestTightnessOrPain = 'ChestTightnessOrPain',
+    Chills = 'Chills',
+    Constipation = 'Constipation',
+    Contraceptive = 'Contraceptive',
+    Coughing = 'Coughing',
+    CrossCountrySkiingSpeed = 'CrossCountrySkiingSpeed',
+    CyclingCadence = 'CyclingCadence',
+    CyclingFunctionalThresholdPower = 'CyclingFunctionalThresholdPower',
+    CyclingPower = 'CyclingPower',
+    CyclingSpeed = 'CyclingSpeed',
+    Diarrhea = 'Diarrhea',
+    DietaryChromium = 'DietaryChromium',
+    DistanceCrossCountrySkiing = 'DistanceCrossCountrySkiing',
+    DistancePaddleSports = 'DistancePaddleSports',
+    DistanceRowing = 'DistanceRowing',
+    DistanceSkatingSports = 'DistanceSkatingSports',
+    Dizziness = 'Dizziness',
+    DrySkin = 'DrySkin',
+    ElectrodermalActivity = 'ElectrodermalActivity',
+    EnvironmentalAudioExposureEvent = 'EnvironmentalAudioExposureEvent',
+    EnvironmentalSoundReduction = 'EnvironmentalSoundReduction',
+    EstimatedWorkoutEffortScore = 'EstimatedWorkoutEffortScore',
+    Fainting = 'Fainting',
+    Fatigue = 'Fatigue',
+    Fever = 'Fever',
+    ForcedExpiratoryVolume1 = 'ForcedExpiratoryVolume1',
+    ForcedVitalCapacity = 'ForcedVitalCapacity',
+    GeneralizedBodyAche = 'GeneralizedBodyAche',
+    HairLoss = 'HairLoss',
+    HandwashingEvent = 'HandwashingEvent',
+    Headache = 'Headache',
+    HeadphoneAudioExposureEvent = 'HeadphoneAudioExposureEvent',
+    HeartRateRecoveryOneMinute = 'HeartRateRecoveryOneMinute',
+    Heartburn = 'Heartburn',
+    HighHeartRateEvent = 'HighHeartRateEvent',
+    HotFlashes = 'HotFlashes',
+    HypertensionEvent = 'HypertensionEvent',
+    InfrequentMenstrualCycles = 'InfrequentMenstrualCycles',
+    InhalerUsage = 'InhalerUsage',
+    IntermenstrualBleeding = 'IntermenstrualBleeding',
+    IrregularHeartRhythmEvent = 'IrregularHeartRhythmEvent',
+    IrregularMenstrualCycles = 'IrregularMenstrualCycles',
+    Lactation = 'Lactation',
+    LossOfSmell = 'LossOfSmell',
+    LossOfTaste = 'LossOfTaste',
+    LowCardioFitnessEvent = 'LowCardioFitnessEvent',
+    LowHeartRateEvent = 'LowHeartRateEvent',
+    LowerBackPain = 'LowerBackPain',
+    MemoryLapse = 'MemoryLapse',
+    MenstrualFlow = 'MenstrualFlow',
+    MoodChanges = 'MoodChanges',
+    Nausea = 'Nausea',
+    NightSweats = 'NightSweats',
+    NumberOfAlcoholicBeverages = 'NumberOfAlcoholicBeverages',
+    NumberOfTimesFallen = 'NumberOfTimesFallen',
+    OvulationTestResult = 'OvulationTestResult',
+    PaddleSportsSpeed = 'PaddleSportsSpeed',
+    PelvicPain = 'PelvicPain',
+    PeripheralPerfusionIndex = 'PeripheralPerfusionIndex',
+    PersistentIntermenstrualBleeding = 'PersistentIntermenstrualBleeding',
+    PhysicalEffort = 'PhysicalEffort',
+    Pregnancy = 'Pregnancy',
+    PregnancyTestResult = 'PregnancyTestResult',
+    ProgesteroneTestResult = 'ProgesteroneTestResult',
+    ProlongedMenstrualPeriods = 'ProlongedMenstrualPeriods',
+    PushCount = 'PushCount',
+    RapidPoundingOrFlutteringHeartbeat = 'RapidPoundingOrFlutteringHeartbeat',
+    RowingSpeed = 'RowingSpeed',
+    RunnyNose = 'RunnyNose',
+    SexualActivity = 'SexualActivity',
+    ShortnessOfBreath = 'ShortnessOfBreath',
+    SinusCongestion = 'SinusCongestion',
+    SixMinuteWalkTestDistance = 'SixMinuteWalkTestDistance',
+    SkippedHeartbeat = 'SkippedHeartbeat',
+    SleepApneaEvent = 'SleepApneaEvent',
+    SleepChanges = 'SleepChanges',
+    SoreThroat = 'SoreThroat',
+    StairAscentSpeed = 'StairAscentSpeed',
+    StairDescentSpeed = 'StairDescentSpeed',
+    SwimmingStrokeCount = 'SwimmingStrokeCount',
+    TimeInDaylight = 'TimeInDaylight',
+    ToothbrushingEvent = 'ToothbrushingEvent',
+    UVExposure = 'UVExposure',
+    UnderwaterDepth = 'UnderwaterDepth',
+    VaginalDryness = 'VaginalDryness',
+    Vomiting = 'Vomiting',
+    WalkingAsymmetryPercentage = 'WalkingAsymmetryPercentage',
+    WalkingDoubleSupportPercentage = 'WalkingDoubleSupportPercentage',
+    WalkingSpeed = 'WalkingSpeed',
+    WalkingStepLength = 'WalkingStepLength',
+    WaterTemperature = 'WaterTemperature',
+    Wheezing = 'Wheezing',
+    WorkoutEffortScore = 'WorkoutEffortScore',
+    StateOfMind = 'StateOfMind',
+    GAD7Assessment = 'GAD7Assessment',
+    PHQ9Assessment = 'PHQ9Assessment',
+    MedicationDoseEvent = 'MedicationDoseEvent',
+    UserAnnotatedMedications = 'UserAnnotatedMedications',
   }
 
   export enum HealthUnit {
@@ -873,6 +995,185 @@ declare module 'react-native-health' {
     percent = 'percent',
     pound = 'pound',
     second = 'second',
+    kilometer = 'kilometer',
+    liter = 'liter',
+    milliliter = 'milliliter',
+    milligram = 'milligram',
+    microgram = 'microgram',
+    watt = 'watt',
+    rpm = 'rpm',
+    meterPerSecond = 'meterPerSecond',
+    kmPerHour = 'kmPerHour',
+    milePerHour = 'milePerHour',
+    kcalPerKgHour = 'kcalPerKgHour',
+    decibel = 'decibel',
+    microsiemens = 'microsiemens',
+    appleEffortScore = 'appleEffortScore',
+    mlPerKgMin = 'mlPerKgMin',
+  }
+
+  export type StateOfMindKind = 'MomentaryEmotion' | 'DailyMood'
+
+  export type StateOfMindValenceClassification =
+    | 'VeryUnpleasant'
+    | 'Unpleasant'
+    | 'SlightlyUnpleasant'
+    | 'Neutral'
+    | 'SlightlyPleasant'
+    | 'Pleasant'
+    | 'VeryPleasant'
+
+  export type StateOfMindLabel =
+    | 'Amazed' | 'Amused' | 'Angry' | 'Anxious' | 'Ashamed' | 'Brave' | 'Calm' | 'Content'
+    | 'Disappointed' | 'Discouraged' | 'Disgusted' | 'Embarrassed' | 'Excited' | 'Frustrated'
+    | 'Grateful' | 'Guilty' | 'Happy' | 'Hopeless' | 'Irritated' | 'Jealous' | 'Joyful' | 'Lonely'
+    | 'Passionate' | 'Peaceful' | 'Proud' | 'Relieved' | 'Sad' | 'Scared' | 'Stressed' | 'Surprised'
+    | 'Worried' | 'Annoyed' | 'Confident' | 'Drained' | 'Hopeful' | 'Indifferent' | 'Overwhelmed'
+    | 'Satisfied'
+
+  export type StateOfMindAssociation =
+    | 'Community' | 'CurrentEvents' | 'Dating' | 'Education' | 'Family' | 'Fitness' | 'Friends'
+    | 'Health' | 'Hobbies' | 'Identity' | 'Money' | 'Partner' | 'SelfCare' | 'Spirituality'
+    | 'Tasks' | 'Travel' | 'Work' | 'Weather'
+
+  export interface StateOfMindQueryOptions {
+    startDate?: string
+    endDate?: string
+    limit?: number
+    ascending?: boolean
+    kind?: StateOfMindKind
+  }
+
+  export interface StateOfMindSample {
+    id: string
+    kind: StateOfMindKind
+    /** -1 (very unpleasant) .. 1 (very pleasant) */
+    valence: number
+    valenceClassification: StateOfMindValenceClassification
+    labels: StateOfMindLabel[]
+    associations: StateOfMindAssociation[]
+    startDate: string
+    endDate: string
+    sourceName: string
+    sourceId: string
+    metadata: Record<string, string | number>
+  }
+
+  export interface StateOfMindSaveOptions {
+    /** ISO date; defaults to now */
+    date?: string
+    /** defaults to 'MomentaryEmotion' */
+    kind?: StateOfMindKind
+    /** -1 .. 1 */
+    valence: number
+    labels?: StateOfMindLabel[]
+    associations?: StateOfMindAssociation[]
+    metadata?: Record<string, string | number>
+  }
+
+  export type ScoredAssessmentType = 'GAD7' | 'PHQ9'
+
+  export type GAD7Risk = 'NoneToMinimal' | 'Mild' | 'Moderate' | 'Severe'
+  export type PHQ9Risk = 'NoneToMinimal' | 'Mild' | 'Moderate' | 'ModeratelySevere' | 'Severe'
+
+  export interface ScoredAssessmentQueryOptions {
+    /** defaults to 'GAD7' */
+    type?: ScoredAssessmentType
+    startDate?: string
+    endDate?: string
+    limit?: number
+    ascending?: boolean
+  }
+
+  export interface ScoredAssessmentSample {
+    id: string
+    type: ScoredAssessmentType
+    score: number
+    risk: GAD7Risk | PHQ9Risk
+    /** 0 = not at all, 1 = several days, 2 = more than half the days, 3 = nearly every day (PHQ-9: 4 = prefer not to answer) */
+    answers: number[]
+    startDate: string
+    endDate: string
+    sourceName: string
+    sourceId: string
+    metadata: Record<string, string | number>
+  }
+
+  export interface ScoredAssessmentSaveOptions {
+    type: ScoredAssessmentType
+    /** ISO date; defaults to now */
+    date?: string
+    /** 7 answers for GAD7, 9 for PHQ9 */
+    answers: number[]
+    metadata?: Record<string, string | number>
+  }
+
+  export type MedicationGeneralForm =
+    | 'capsule' | 'cream' | 'device' | 'drops' | 'foam' | 'gel' | 'inhaler' | 'injection'
+    | 'liquid' | 'lotion' | 'ointment' | 'patch' | 'powder' | 'spray' | 'suppository'
+    | 'tablet' | 'topical' | 'unknown'
+    | (string & {})
+
+  export interface MedicationClinicalCoding {
+    system: string
+    version: string | null
+    code: string
+  }
+
+  export interface MedicationConcept {
+    /** Opaque id; pass it to getMedicationDoseEvents({ medicationIds }) */
+    id: string
+    displayText: string
+    generalForm: MedicationGeneralForm
+    relatedCodings: MedicationClinicalCoding[]
+  }
+
+  export interface UserAnnotatedMedicationsQueryOptions {
+    isArchived?: boolean
+    hasSchedule?: boolean
+    limit?: number
+  }
+
+  export interface UserAnnotatedMedication {
+    medication: MedicationConcept
+    nickname: string | null
+    isArchived: boolean
+    hasSchedule: boolean
+  }
+
+  export type MedicationDoseLogStatus =
+    | 'NotInteracted'
+    | 'NotificationNotSent'
+    | 'Snoozed'
+    | 'Taken'
+    | 'Skipped'
+    | 'NotLogged'
+
+  export interface MedicationDoseEventQueryOptions {
+    startDate?: string
+    endDate?: string
+    limit?: number
+    ascending?: boolean
+    /** ids from getUserAnnotatedMedications */
+    medicationIds?: string[]
+    logStatus?: MedicationDoseLogStatus | MedicationDoseLogStatus[]
+  }
+
+  export interface MedicationDoseEvent {
+    id: string
+    medicationId: string
+    scheduleType: 'AsNeeded' | 'Schedule'
+    logStatus: MedicationDoseLogStatus
+    scheduledDate: string | null
+    scheduledDoseQuantity: number | null
+    doseQuantity: number | null
+    /** HealthKit unit string, e.g. "count" */
+    unit: string
+    startDate: string
+    endDate: string
+    sourceName: string
+    sourceId: string
+    metadata: Record<string, string | number>
   }
 
   export enum HealthStatusCode {

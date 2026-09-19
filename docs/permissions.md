@@ -25,61 +25,189 @@ AppleHealthKit.initHealthKit(permissions, (error: string) => {
 ## Available Permissions
 
 ```
+  AbdominalCramps
+  Acne
   ActiveEnergyBurned
   ActivitySummary
   AllergyRecord
+  AppetiteChanges
   AppleExerciseTime
+  AppleMoveTime
+  AppleSleepingBreathingDisturbances
+  AppleSleepingWristTemperature
+  AppleStandHour
   AppleStandTime
+  AppleWalkingSteadiness
+  AppleWalkingSteadinessEvent
+  AtrialFibrillationBurden
+  AudioExposureEvent
+  BasalBodyTemperature
   BasalEnergyBurned
   BiologicalSex
-  BloodType
+  Biotin
+  BladderIncontinence
+  BleedingAfterPregnancy
+  BleedingDuringPregnancy
+  Bloating
   BloodAlcoholContent
   BloodGlucose
   BloodPressureDiastolic
   BloodPressureSystolic
+  BloodType
   BodyFatPercentage
   BodyMass
   BodyMassIndex
   BodyTemperature
-  DateOfBirth
-  Biotin
+  BreastPain
   Caffeine
   Calcium
   Carbohydrates
+  CervicalMucusQuality
+  ChestTightnessOrPain
+  Chills
   Chloride
   Cholesterol
   ConditionRecord
+  Constipation
+  Contraceptive
   Copper
+  Coughing
   CoverageRecord
+  CrossCountrySkiingSpeed
+  CyclingCadence
+  CyclingFunctionalThresholdPower
+  CyclingPower
+  CyclingSpeed
+  DateOfBirth
+  Diarrhea
+  DietaryChromium
+  DistanceCrossCountrySkiing
+  DistanceCycling
+  DistanceDownhillSnowSports
+  DistancePaddleSports
+  DistanceRowing
+  DistanceSkatingSports
+  DistanceSwimming
+  DistanceWalkingRunning
+  DistanceWheelchair
+  Dizziness
+  DrySkin
   Electrocardiogram
+  ElectrodermalActivity
   EnergyConsumed
   EnvironmentalAudioExposure
+  EnvironmentalAudioExposureEvent
+  EnvironmentalSoundReduction
+  EstimatedWorkoutEffortScore
+  Fainting
+  Fatigue
   FatMonounsaturated
   FatPolyunsaturated
   FatSaturated
   FatTotal
+  Fever
   Fiber
+  FlightsClimbed
   Folate
+  ForcedExpiratoryVolume1
+  ForcedVitalCapacity
+  GAD7Assessment
+  GeneralizedBodyAche
+  HairLoss
+  HandwashingEvent
+  Headache
   HeadphoneAudioExposure
+  HeadphoneAudioExposureEvent
+  HeartbeatSeries
+  Heartburn
+  HeartRate
+  HeartRateRecoveryOneMinute
+  HeartRateVariability
+  Height
+  HighHeartRateEvent
+  HotFlashes
+  HypertensionEvent
   ImmunizationRecord
+  InfrequentMenstrualCycles
+  InhalerUsage
+  IntermenstrualBleeding
   Iodine
   Iron
+  IrregularHeartRhythmEvent
+  IrregularMenstrualCycles
   LabResultRecord
+  Lactation
+  LeanBodyMass
+  LossOfSmell
+  LossOfTaste
+  LowCardioFitnessEvent
+  LowerBackPain
+  LowHeartRateEvent
   Magnesium
   Manganese
+  MedicationDoseEvent
   MedicationRecord
+  MemoryLapse
+  MenstrualFlow
+  MindfulSession
   Molybdenum
+  MoodChanges
+  Nausea
   Niacin
+  NightSweats
+  NikeFuel
+  NumberOfAlcoholicBeverages
+  NumberOfTimesFallen
+  OvulationTestResult
+  PaddleSportsSpeed
   PantothenicAcid
+  PeakFlow
+  PelvicPain
+  PeripheralPerfusionIndex
+  PersistentIntermenstrualBleeding
   Phosphorus
+  PHQ9Assessment
+  PhysicalEffort
   Potassium
+  Pregnancy
+  PregnancyTestResult
   ProcedureRecord
+  ProgesteroneTestResult
+  ProlongedMenstrualPeriods
   Protein
+  PushCount
+  RapidPoundingOrFlutteringHeartbeat
+  RespiratoryRate
+  RestingHeartRate
   Riboflavin
+  RowingSpeed
+  RunnyNose
   Selenium
+  SexualActivity
+  ShortnessOfBreath
+  SinusCongestion
+  SixMinuteWalkTestDistance
+  SkippedHeartbeat
+  SleepAnalysis
+  SleepApneaEvent
+  SleepChanges
   Sodium
+  SoreThroat
+  StairAscentSpeed
+  StairDescentSpeed
+  StateOfMind
+  StepCount
+  Steps
   Sugar
+  SwimmingStrokeCount
   Thiamin
+  TimeInDaylight
+  ToothbrushingEvent
+  UnderwaterDepth
+  UserAnnotatedMedications
+  UVExposure
+  VaginalDryness
+  VitalSignRecord
   VitaminA
   VitaminB12
   VitaminB6
@@ -87,30 +215,20 @@ AppleHealthKit.initHealthKit(permissions, (error: string) => {
   VitaminD
   VitaminE
   VitaminK
-  Zinc
-  Water
-  DistanceCycling
-  DistanceSwimming
-  DistanceWalkingRunning
-  FlightsClimbed
-  HeartbeatSeries
-  HeartRate
-  RestingHeartRate
-  HeartRateVariability
-  Height
-  LeanBodyMass
-  MindfulSession
-  NikeFuel
-  RespiratoryRate
-  SleepAnalysis
-  StepCount
-  Steps
-  VitalSignRecord
   Vo2Max
+  Vomiting
+  WalkingAsymmetryPercentage
+  WalkingDoubleSupportPercentage
   WalkingHeartRateAverage
+  WalkingSpeed
+  WalkingStepLength
+  Water
+  WaterTemperature
   Weight
+  Wheezing
   Workout
-  PeakFlow
+  WorkoutEffortScore
+  Zinc
 ```
 
 ## Supported Apple Permissions

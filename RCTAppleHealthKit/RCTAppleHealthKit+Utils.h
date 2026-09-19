@@ -26,6 +26,8 @@ extern NSString * const kMetadataKey;
 + (NSDate *)endDateFromOptions:(NSDictionary *)options;
 + (NSDate *)endDateFromOptionsDefaultNow:(NSDictionary *)options;
 + (HKSampleType *)quantityTypeFromName:(NSString *)type;
++ (HKUnit *)defaultUnitForQuantityType:(HKQuantityType *)quantityType;
++ (NSDictionary *)jsonSafeMetadata:(NSDictionary *)metadata;
 + (HKSampleType *)clinicalTypeFromName:(NSString *)type;
 + (HKQueryAnchor *)hkAnchorFromOptions:(NSDictionary *)options;
 + (HKUnit *)hkUnitFromOptions:(NSDictionary *)options key:(NSString *)key withDefault:(HKUnit *)defaultValue;
@@ -40,5 +42,8 @@ extern NSString * const kMetadataKey;
 + (NSArray *)formatWorkoutEvents:(NSArray *)workoutEvents;
 + (NSMutableArray *)reverseNSMutableArray:(NSMutableArray *)array;
 + (NSString*) stringForHKWorkoutActivityType:(int) enumValue;
++ (double)workoutTotalEnergyBurned:(HKWorkout *)workout unit:(HKUnit *)unit;
++ (double)workoutTotalDistance:(HKWorkout *)workout unit:(HKUnit *)unit;
++ (HKQuantityType *)distanceQuantityTypeForWorkoutActivityType:(HKWorkoutActivityType)activityType;
 
 @end

@@ -241,12 +241,10 @@
     }];
 }
 
-- (void)results_registerObservers:(RCTBridge *)bridge hasListeners:(bool)hasListeners
+- (void)results_registerObservers
 {
-    if (@available(iOS 11.0, *)) {
-        HKSampleType* insulinType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierInsulinDelivery];
-        [self setObserverForType:insulinType type:@"InsulinDelivery" bridge:bridge hasListeners:hasListeners];
-    }
+    HKSampleType* insulinType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierInsulinDelivery];
+    [self registerBackgroundObserverForType:insulinType type:@"InsulinDelivery"];
 }
 
 - (void)deleteSamplesByType:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback {

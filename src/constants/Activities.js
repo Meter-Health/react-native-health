@@ -82,4 +82,8 @@ export const Activities = {
   TaiChi: 'TaiChi',
   MixedCardio: 'MixedCardio',
   HandCycling: 'HandCycling',
+  SwimBikeRun: 'SwimBikeRun',
+  Transition: 'Transition',
+  UnderwaterDiving: 'UnderwaterDiving',
+  Other: 'Other',
 }

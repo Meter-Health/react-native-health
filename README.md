@@ -12,6 +12,49 @@ If you are looking for a more robust solution providing normalized data, insight
 ## METER HEALTH
 ### Fork changelog:
 
+#### 2.0.0
+
+- **New Architecture / TurboModule support.** The module ships a codegen spec
+  (`src/NativeAppleHealthKit.ts`) and is registered as a TurboModule, so it works
+  in bridgeless mode (React Native 0.76+ / Expo SDK 52+) without the interop layer.
+  The JS API is unchanged.
+- Background observers no longer need the bridge:
+  `initializeBackgroundObservers()` replaces `initializeBackgroundObservers:bridge`
+  (the old selector still exists but ignores its argument). Events are delivered
+  through the regular `NativeEventEmitter` in both architectures.
+- Expo config plugin: new `enableBackgroundObservers` option that wires the
+  AppDelegate call and the background-delivery entitlement for you.
+- HealthKit API updates: `saveWorkout` uses `HKWorkoutBuilder` (the `HKWorkout`
+  initializer is deprecated since iOS 17), workout energy/distance are read from
+  workout statistics (`totalEnergyBurned`/`totalDistance` are deprecated since
+  iOS 18), and the `SwimBikeRun`, `Transition`, `UnderwaterDiving` and `Other`
+  activity types were added.
+- HealthKit data types brought up to the iOS 26 SDK: 43 additional quantity types
+  (cycling power/cadence/speed/FTP, physical effort, time in daylight, workout effort
+  score, mobility metrics, HRR, AFib burden, sleeping wrist temperature, breathing
+  disturbances, cross-country skiing / rowing / paddle / skating distance & speed, ...)
+  and 68 category types (symptoms, heart / hearing / mobility events, sleep apnea,
+  hypertension, reproductive health, ...) are now requestable as permissions and
+  readable through `getSamples`. Read-only Apple types are filtered out of write
+  permissions instead of failing the whole authorization request.
+- `getSamples` accepts any readable permission name, picks a fitting unit when none
+  (or an incompatible one) is given, and returns category samples with their `value`.
+- More units (`watt`, `rpm`, `meterPerSecond`, `kmPerHour`, `kcalPerKgHour`,
+  `appleEffortScore`, ...), plus any raw HealthKit unit string.
+- New APIs: State of Mind (`getStateOfMindSamples` / `saveStateOfMind`), GAD-7 & PHQ-9
+  scored assessments (`getScoredAssessments` / `saveScoredAssessment`) on iOS 18+, and
+  the read-only Medications API (`getUserAnnotatedMedications` /
+  `getMedicationDoseEvents`) on iOS 26+. Permissions: `StateOfMind`, `GAD7Assessment`,
+  `PHQ9Assessment`, `MedicationDoseEvent`, `UserAnnotatedMedications`. On older iOS the
+  methods return an error instead of crashing; building them needs Xcode 16 / Xcode 26
+  respectively (older SDKs compile them out).
+- Requires React Native >= 0.71 and iOS 15.1+.
+- Breaking: `saveWorkout` now needs write permission for `ActiveEnergyBurned`
+  (when `energyBurned` is given) and the matching distance type (when `distance`
+  is given), in addition to `Workout`.
+
+#### 1.x
+
 - Added save functions for:
   - Heartrate variability
   - Resting heartrate
@@ -130,37 +173,46 @@ AppleHealthKit.initHealthKit(permissions, (error: string) => {
 For background capabilities, Apple allows developers to setup long running observer
 queries for the health types needed.
 
-To set that up in your app, in XCode open your `ios/AppDelegate.m` file and add the
-following statements:
+Register the observers once at app launch. With the Swift `AppDelegate.swift` that
+React Native 0.77+ templates ship with:
+
+```swift
+import RNAppleHealthKit
+
+@main
+class AppDelegate: RCTAppDelegate {
+  override func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+  ) -> Bool {
+    /* Add Background initializer for HealthKit */
+    RCTAppleHealthKit().initializeBackgroundObservers()
+
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+}
+```
+
+Or, with an Objective-C `AppDelegate.mm`:
 
 ```objective-c
-#import "AppDelegate.h"
-
-...
-
-/* Add the library import at the top of AppDelegate.m */
-#import "RCTAppleHealthKit.h"
-
-...
-
-@implementation AppDelegate
+#import <RNAppleHealthKit/RCTAppleHealthKit.h>
 
 - (BOOL)application:(UIApplication *)application
     didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+  /* Add Background initializer for HealthKit */
+  [[RCTAppleHealthKit new] initializeBackgroundObservers];
 
-  RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self
-                                            launchOptions:launchOptions];
-
-  ...
-
-  /* Add Background initializer for HealthKit  */
-  [[RCTAppleHealthKit new] initializeBackgroundObservers:bridge];
-
-  ...
-
-  return YES;
+  return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 ```
+
+Expo projects don't edit the AppDelegate by hand: set `enableBackgroundObservers: true`
+on the config plugin instead (see [Expo](/docs/Expo.md)).
+
+The HealthKit "Background Delivery" capability
+(`com.apple.developer.healthkit.background-delivery` entitlement) must be enabled for
+iOS to wake the app when new samples arrive.
 
 After that you can start listening for data updates using the React Native
 client. For more information, see [background observers](/docs/background.md).
@@ -181,6 +233,18 @@ All the documentation is under the [docs](/docs) folder. They are split into the
 - [isAvailable](/docs/isAvailable.md)
 - [initHealthKit](/docs/initHealthKit.md)
 - [getAuthStatus](/docs/getAuthStatus.md)
+
+### Mental Wellbeing Methods (iOS 18+)
+
+- [getStateOfMindSamples](/docs/getStateOfMindSamples.md)
+- [saveStateOfMind](/docs/saveStateOfMind.md)
+- [getScoredAssessments](/docs/getScoredAssessments.md)
+- [saveScoredAssessment](/docs/saveScoredAssessment.md)
+
+### Medication Methods (iOS 26+)
+
+- [getUserAnnotatedMedications](/docs/getUserAnnotatedMedications.md)
+- [getMedicationDoseEvents](/docs/getMedicationDoseEvents.md)
 
 ### Background Methods
 

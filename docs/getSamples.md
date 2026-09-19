@@ -9,6 +9,8 @@ let options = {
   startDate: new Date(2021, 0, 0).toISOString(),
   endDate: new Date().toISOString(),
   type: 'Walking', // one of: ['Walking', 'StairClimbing', 'Running', 'Cycling', 'Workout']
+  // or any readable permission name, e.g. 'CyclingPower', 'TimeInDaylight', 'WalkingSpeed', 'SleepApneaEvent'
+  unit: 'watt', // optional; see docs/units.md. Omitted or incompatible -> a fitting default is used
 }
 ```
 
@@ -55,5 +57,20 @@ for other types:
   //based on required type, one of the following will be present.
   distance: Number, // [[sample totalDistance] doubleValueForUnit:[HKUnit mileUnit]]
   calories: Number, // [[sample totalEnergyBurned] doubleValueForUnit:[HKUnit kilocalorieUnit]]
+}
+```
+
+For category types (symptoms, heart / hearing / mobility events, reproductive health, ...) the
+object carries the raw HealthKit category `value` instead of a quantity:
+
+```
+{
+  value: Number, // HKCategorySample.value (meaning depends on the type, e.g. HKCategoryValueSeverity)
+  tracked: Boolean,
+  sourceName: String,
+  sourceId: String,
+  device: String,
+  start: String,
+  end: String,
 }
 ```

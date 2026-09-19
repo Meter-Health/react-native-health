@@ -127,27 +127,86 @@
     HKWorkoutActivityType type = [RCTAppleHealthKit hkWorkoutActivityTypeFromOptions:input key:@"type" withDefault:HKWorkoutActivityTypeAmericanFootball];
     NSDate *startDate = [RCTAppleHealthKit dateFromOptions:input key:@"startDate" withDefault:nil];
     NSDate *endDate = [RCTAppleHealthKit dateFromOptions:input key:@"endDate" withDefault:nil];
-    NSTimeInterval duration = [RCTAppleHealthKit doubleFromOptions:input key:@"duration" withDefault:(NSTimeInterval)0];
     HKQuantity *totalEnergyBurned = [RCTAppleHealthKit hkQuantityFromOptions:input valueKey:@"energyBurned" unitKey:@"energyBurnedUnit"];
     HKQuantity *totalDistance = [RCTAppleHealthKit hkQuantityFromOptions:input valueKey:@"distance" unitKey:@"distanceUnit"];
 
+    if (startDate == nil || endDate == nil) {
+        callback(@[RCTMakeError(@"startDate and endDate are required in options", nil, nil)]);
+        return;
+    }
+    if ([endDate compare:startDate] == NSOrderedAscending) {
+        callback(@[RCTMakeError(@"endDate must not be before startDate", nil, nil)]);
+        return;
+    }
 
-    HKWorkout *workout = [
-                          HKWorkout workoutWithActivityType:type startDate:startDate endDate:endDate workoutEvents:nil totalEnergyBurned:totalEnergyBurned totalDistance:totalDistance metadata: nil
-                          ];
+    // +[HKWorkout workoutWithActivityType:...] is deprecated since iOS 17. HKWorkoutBuilder is the
+    // replacement: totals are recorded as samples attached to the workout, which is also what the
+    // statistics-based readers (see workoutTotalEnergyBurned:unit:) expect.
+    HKWorkoutConfiguration *configuration = [[HKWorkoutConfiguration alloc] init];
+    configuration.activityType = type;
 
-    void (^completion)(BOOL success, NSError *error);
+    HKWorkoutBuilder *builder = [[HKWorkoutBuilder alloc] initWithHealthStore:self.healthStore
+                                                                configuration:configuration
+                                                                       device:nil];
 
-    completion = ^(BOOL success, NSError *error){
-        if (!success) {
-            NSLog(@"An error occured saving the workout %@. The error was: %@.", workout, error);
-            callback(@[RCTMakeError(@"An error occured saving the workout", error, nil)]);
-
+    NSMutableArray<HKSample *> *samples = [NSMutableArray array];
+    if (totalEnergyBurned != nil) {
+        HKQuantityType *energyType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierActiveEnergyBurned];
+        if ([totalEnergyBurned isCompatibleWithUnit:[HKUnit kilocalorieUnit]]) {
+            [samples addObject:[HKQuantitySample quantitySampleWithType:energyType quantity:totalEnergyBurned startDate:startDate endDate:endDate]];
+        } else {
+            callback(@[RCTMakeError(@"energyBurnedUnit must be an energy unit", nil, nil)]);
             return;
         }
-        callback(@[[NSNull null], [[workout UUID] UUIDString]]);
+    }
+    if (totalDistance != nil) {
+        HKQuantityType *distanceType = [RCTAppleHealthKit distanceQuantityTypeForWorkoutActivityType:type];
+        if ([totalDistance isCompatibleWithUnit:[HKUnit meterUnit]]) {
+            [samples addObject:[HKQuantitySample quantitySampleWithType:distanceType quantity:totalDistance startDate:startDate endDate:endDate]];
+        } else {
+            callback(@[RCTMakeError(@"distanceUnit must be a length unit", nil, nil)]);
+            return;
+        }
+    }
+
+    void (^fail)(NSString *, NSError *) = ^(NSString *message, NSError *error) {
+        NSLog(@"An error occured saving the workout. %@: %@.", message, error);
+        [builder discardWorkout];
+        callback(@[RCTMakeError(message, error, nil)]);
     };
 
-    [self.healthStore saveObject:workout withCompletion:completion];
+    void (^finish)(void) = ^{
+        [builder endCollectionWithEndDate:endDate completion:^(BOOL success, NSError * _Nullable error) {
+            if (!success) {
+                fail(@"An error occured ending the workout", error);
+                return;
+            }
+            [builder finishWorkoutWithCompletion:^(HKWorkout * _Nullable workout, NSError * _Nullable error) {
+                if (workout == nil) {
+                    fail(@"An error occured saving the workout", error);
+                    return;
+                }
+                callback(@[[NSNull null], [[workout UUID] UUIDString]]);
+            }];
+        }];
+    };
+
+    [builder beginCollectionWithStartDate:startDate completion:^(BOOL success, NSError * _Nullable error) {
+        if (!success) {
+            fail(@"An error occured starting the workout", error);
+            return;
+        }
+        if (samples.count == 0) {
+            finish();
+            return;
+        }
+        [builder addSamples:samples completion:^(BOOL success, NSError * _Nullable error) {
+            if (!success) {
+                fail(@"An error occured adding workout samples", error);
+                return;
+            }
+            finish();
+        }];
+    }];
 }
 @end
