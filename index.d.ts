@@ -625,9 +625,28 @@ declare module 'react-native-health' {
     metadata?: RecordMetadata
   }
 
+  export interface WorkoutRouteLocationInput {
+    latitude: number
+    longitude: number
+    /** Milliseconds since epoch, or an ISO 8601 string. Defaults to startDate. */
+    time?: number | string
+    /** Metres. */
+    altitude?: number
+    /** Metres; must be >= 0. */
+    horizontalAccuracy?: number
+    /** Metres. */
+    verticalAccuracy?: number
+  }
+
   export interface HealthActivityOptions
     extends Omit<Omit<HealthValueOptions, 'unit'>, 'value'> {
     type: HealthActivity
+    energyBurned?: number
+    energyBurnedUnit?: HealthUnit
+    distance?: number
+    distanceUnit?: HealthUnit
+    /** Saved as an HKWorkoutRoute attached to the workout (needs WorkoutRoute write permission). */
+    route?: WorkoutRouteLocationInput[]
   }
 
   export interface HealthObserverOptions {

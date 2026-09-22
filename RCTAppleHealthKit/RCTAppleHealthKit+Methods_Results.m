@@ -265,6 +265,8 @@
         sampleType = [HKObjectType categoryTypeForIdentifier:HKCategoryTypeIdentifierSleepAnalysis];
     } else if ([type isEqualToString:@"Workout"]) {
         sampleType = [HKObjectType workoutType];
+    } else if ([type isEqualToString:@"WorkoutRoute"]) {
+        sampleType = [HKSeriesType workoutRouteType];
     } else {
         NSDictionary *typeMap = @{
             @"HeartRate":              HKQuantityTypeIdentifierHeartRate,
@@ -281,6 +283,14 @@
             @"BodyTemperature":        HKQuantityTypeIdentifierBodyTemperature,
             @"BodyFatPercentage":      HKQuantityTypeIdentifierBodyFatPercentage,
             @"DistanceWalkingRunning": HKQuantityTypeIdentifierDistanceWalkingRunning,
+            @"EnergyConsumed":         HKQuantityTypeIdentifierDietaryEnergyConsumed,
+            @"Protein":                HKQuantityTypeIdentifierDietaryProtein,
+            @"Carbohydrates":          HKQuantityTypeIdentifierDietaryCarbohydrates,
+            @"FatTotal":               HKQuantityTypeIdentifierDietaryFatTotal,
+            @"Sugar":                  HKQuantityTypeIdentifierDietarySugar,
+            @"Fiber":                  HKQuantityTypeIdentifierDietaryFiber,
+            @"Sodium":                 HKQuantityTypeIdentifierDietarySodium,
+            @"Water":                  HKQuantityTypeIdentifierDietaryWater,
         };
         NSString *identifier = typeMap[type];
         if (!identifier) {

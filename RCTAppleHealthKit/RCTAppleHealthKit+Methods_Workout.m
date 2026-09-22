@@ -9,6 +9,7 @@
 #import "RCTAppleHealthKit+Methods_Workout.h"
 #import "RCTAppleHealthKit+Utils.h"
 #import "RCTAppleHealthKit+Queries.h"
+#import <CoreLocation/CoreLocation.h>
 
 @implementation RCTAppleHealthKit (Methods_Workout)
 
@@ -123,6 +124,58 @@
                      completion:completion];
 }
 
+// Optional `route` array on the save-workout input: objects with `latitude`,
+// `longitude`, and optionally `time` (ms since epoch, or ISO 8601 string),
+// `altitude`, `horizontalAccuracy`, `verticalAccuracy` (metres). Points with an
+// invalid coordinate or negative accuracy are skipped since HealthKit rejects
+// them; the result is sorted by timestamp as HKWorkoutRouteBuilder requires.
++ (NSArray<CLLocation *> *)workoutRouteLocationsFromInput:(NSDictionary *)input defaultDate:(NSDate *)defaultDate {
+    id routeInput = [input objectForKey:@"route"];
+    NSMutableArray<CLLocation *> *locations = [NSMutableArray array];
+    if (![routeInput isKindOfClass:[NSArray class]]) {
+        return locations;
+    }
+
+    for (id point in (NSArray *)routeInput) {
+        if (![point isKindOfClass:[NSDictionary class]]) continue;
+        NSDictionary *dict = (NSDictionary *)point;
+        id latValue = dict[@"latitude"];
+        id lngValue = dict[@"longitude"];
+        if (![latValue isKindOfClass:[NSNumber class]] || ![lngValue isKindOfClass:[NSNumber class]]) continue;
+
+        CLLocationCoordinate2D coordinate = CLLocationCoordinate2DMake([latValue doubleValue], [lngValue doubleValue]);
+        if (!CLLocationCoordinate2DIsValid(coordinate)) continue;
+
+        NSDate *timestamp = nil;
+        id timeValue = dict[@"time"];
+        if ([timeValue isKindOfClass:[NSNumber class]]) {
+            timestamp = [NSDate dateWithTimeIntervalSince1970:[timeValue doubleValue] / 1000.0];
+        } else if ([timeValue isKindOfClass:[NSString class]]) {
+            timestamp = [RCTAppleHealthKit parseISO8601DateFromString:timeValue];
+        }
+        if (timestamp == nil) timestamp = defaultDate;
+
+        id altitudeValue = dict[@"altitude"];
+        id hAccValue = dict[@"horizontalAccuracy"];
+        id vAccValue = dict[@"verticalAccuracy"];
+        double altitude = [altitudeValue isKindOfClass:[NSNumber class]] ? [altitudeValue doubleValue] : 0.0;
+        double horizontalAccuracy = [hAccValue isKindOfClass:[NSNumber class]] ? [hAccValue doubleValue] : 5.0;
+        double verticalAccuracy = [vAccValue isKindOfClass:[NSNumber class]] ? [vAccValue doubleValue] : 5.0;
+        if (horizontalAccuracy < 0) continue;
+
+        [locations addObject:[[CLLocation alloc] initWithCoordinate:coordinate
+                                                           altitude:altitude
+                                                 horizontalAccuracy:horizontalAccuracy
+                                                   verticalAccuracy:verticalAccuracy
+                                                          timestamp:timestamp]];
+    }
+
+    [locations sortUsingComparator:^NSComparisonResult(CLLocation *a, CLLocation *b) {
+        return [a.timestamp compare:b.timestamp];
+    }];
+    return locations;
+}
+
 - (void)workout_save: (NSDictionary *)input callback: (RCTResponseSenderBlock)callback {
     HKWorkoutActivityType type = [RCTAppleHealthKit hkWorkoutActivityTypeFromOptions:input key:@"type" withDefault:HKWorkoutActivityTypeAmericanFootball];
     NSDate *startDate = [RCTAppleHealthKit dateFromOptions:input key:@"startDate" withDefault:nil];
@@ -138,6 +191,8 @@
         callback(@[RCTMakeError(@"endDate must not be before startDate", nil, nil)]);
         return;
     }
+
+    NSArray<CLLocation *> *routeLocations = [RCTAppleHealthKit workoutRouteLocationsFromInput:input defaultDate:startDate];
 
     // +[HKWorkout workoutWithActivityType:...] is deprecated since iOS 17. HKWorkoutBuilder is the
     // replacement: totals are recorded as samples attached to the workout, which is also what the
@@ -186,7 +241,31 @@
                     fail(@"An error occured saving the workout", error);
                     return;
                 }
-                callback(@[[NSNull null], [[workout UUID] UUIDString]]);
+                NSString *workoutId = [[workout UUID] UUIDString];
+                if (routeLocations.count < 2) {
+                    callback(@[[NSNull null], workoutId]);
+                    return;
+                }
+
+                // The route is a separate HKWorkoutRoute sample attached to the
+                // finished workout. The workout is already committed at this
+                // point, so a route failure is reported as such.
+                HKWorkoutRouteBuilder *routeBuilder = [[HKWorkoutRouteBuilder alloc] initWithHealthStore:self.healthStore device:nil];
+                [routeBuilder insertRouteData:routeLocations completion:^(BOOL success, NSError * _Nullable error) {
+                    if (!success) {
+                        NSLog(@"Workout %@ was saved but its route data could not be inserted: %@", workoutId, error);
+                        callback(@[RCTMakeError(@"Workout saved but an error occured inserting the workout route", error, nil)]);
+                        return;
+                    }
+                    [routeBuilder finishRouteWithWorkout:workout metadata:nil completion:^(HKWorkoutRoute * _Nullable route, NSError * _Nullable error) {
+                        if (route == nil) {
+                            NSLog(@"Workout %@ was saved but its route could not be finished: %@", workoutId, error);
+                            callback(@[RCTMakeError(@"Workout saved but an error occured finishing the workout route", error, nil)]);
+                            return;
+                        }
+                        callback(@[[NSNull null], workoutId]);
+                    }];
+                }];
             }];
         }];
     };

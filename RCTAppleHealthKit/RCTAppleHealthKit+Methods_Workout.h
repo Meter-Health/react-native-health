@@ -7,8 +7,11 @@
 //
 
 #import "RCTAppleHealthKit.h"
+#import <CoreLocation/CoreLocation.h>
 
 @interface RCTAppleHealthKit (Methods_Workout)
+
++ (NSArray<CLLocation *> *)workoutRouteLocationsFromInput:(NSDictionary *)input defaultDate:(NSDate *)defaultDate;
 
 - (void)workout_getAnchoredQuery:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
 - (void)workout_save: (NSDictionary *)input callback: (RCTResponseSenderBlock)callback;
